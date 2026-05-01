@@ -60,7 +60,7 @@ export default async function CompaniesPage({
       </header>
 
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <CompaniesSearch />
+        <CompaniesSearch defaultQ={q} />
         <p className="text-small text-muted-foreground">
           Showing {companies.length}{" "}
           {companies.length === 1 ? "company" : "companies"}
