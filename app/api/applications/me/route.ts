@@ -10,7 +10,14 @@ export async function GET() {
       where: { userId: session.userId },
       orderBy: { createdAt: "desc" },
       include: {
-        job: { select: { id: true, title: true, company: true, location: true } },
+        job: {
+          select: {
+            id: true,
+            title: true,
+            location: true,
+            company: { select: { id: true, slug: true, name: true } },
+          },
+        },
       },
     });
     return NextResponse.json({ items: items.map(serializeApplication) });

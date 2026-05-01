@@ -10,9 +10,9 @@ type Ctx = { params: Promise<{ id: string }> };
 export async function POST(req: NextRequest, ctx: Ctx) {
   try {
     const session = await requireUser();
-    if (session.role === Role.ADMIN) {
+    if (session.role === Role.ADMIN || session.role === Role.EMPLOYER) {
       return NextResponse.json(
-        { error: "Admins cannot apply to jobs" },
+        { error: "Only applicants can apply to jobs" },
         { status: 403 },
       );
     }
@@ -42,7 +42,14 @@ export async function POST(req: NextRequest, ctx: Ctx) {
           resumeUrl: parsed.data.resumeUrl ?? null,
         },
         include: {
-          job: { select: { id: true, title: true, company: true, location: true } },
+          job: {
+            select: {
+              id: true,
+              title: true,
+              location: true,
+              company: { select: { id: true, slug: true, name: true } },
+            },
+          },
         },
       });
       return NextResponse.json(

@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
   if (q) {
     where.OR = [
       { title: { contains: q } },
-      { company: { contains: q } },
+      { company: { name: { contains: q } } },
       { description: { contains: q } },
     ];
   }
@@ -48,6 +48,9 @@ export async function GET(req: NextRequest) {
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * pageSize,
       take: pageSize,
+      include: {
+        company: { select: { id: true, slug: true, name: true, logoUrl: true } },
+      },
     }),
     prisma.job.count({ where }),
   ]);
@@ -72,10 +75,16 @@ export async function POST(req: NextRequest) {
       );
     }
     const data = parsed.data;
+    if (!data.companyId) {
+      return NextResponse.json(
+        { error: "companyId is required" },
+        { status: 400 },
+      );
+    }
     const job = await prisma.job.create({
       data: {
         title: data.title,
-        company: data.company,
+        companyId: data.companyId,
         location: data.location,
         type: mapJobType(data.type),
         salaryRange: data.salaryRange ?? null,
@@ -83,6 +92,9 @@ export async function POST(req: NextRequest) {
         requirements: data.requirements,
         status: mapJobStatus(data.status),
         createdById: session.userId,
+      },
+      include: {
+        company: { select: { id: true, slug: true, name: true, logoUrl: true } },
       },
     });
     return NextResponse.json({ job: serializeJob(job) }, { status: 201 });

@@ -26,3 +26,36 @@ export async function requireAdmin(): Promise<Session> {
   }
   return session;
 }
+
+export type EmployerContext = {
+  session: Session;
+  companyIds: string[];
+};
+
+export async function requireEmployer(): Promise<EmployerContext> {
+  const session = await requireUser();
+  const user = await prisma.user.findUnique({
+    where: { id: session.userId },
+    select: {
+      role: true,
+      companies: { select: { companyId: true } },
+    },
+  });
+  if (!user) throw new HttpError(401, "Unauthorized");
+  if (user.role !== Role.EMPLOYER && user.role !== Role.ADMIN) {
+    throw new HttpError(403, "Forbidden");
+  }
+  return {
+    session,
+    companyIds: user.companies.map((c) => c.companyId),
+  };
+}
+
+export async function requireCompanyMember(companyId: string): Promise<EmployerContext> {
+  const ctx = await requireEmployer();
+  if (ctx.session.role === Role.ADMIN) return ctx;
+  if (!ctx.companyIds.includes(companyId)) {
+    throw new HttpError(403, "Not a member of this company");
+  }
+  return ctx;
+}

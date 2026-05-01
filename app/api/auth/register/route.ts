@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
+import { Prisma, Role } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { registerSchema } from "@/lib/validators";
 import { hashPassword } from "@/lib/password";
@@ -35,11 +35,14 @@ export async function POST(req: NextRequest) {
   const passwordHash = await hashPassword(parsed.data.password);
 
   try {
+    const requestedRole =
+      parsed.data.role === "employer" ? Role.EMPLOYER : Role.APPLICANT;
     const user = await prisma.user.create({
       data: {
         name: parsed.data.name,
         email: parsed.data.email,
         passwordHash,
+        role: requestedRole,
       },
       select: { id: true, name: true, email: true, role: true },
     });

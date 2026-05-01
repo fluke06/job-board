@@ -31,7 +31,14 @@ export async function GET(req: NextRequest) {
         take: pageSize,
         include: {
           user: { select: { id: true, name: true, email: true } },
-          job: { select: { id: true, title: true, company: true, location: true } },
+          job: {
+            select: {
+              id: true,
+              title: true,
+              location: true,
+              company: { select: { id: true, slug: true, name: true } },
+            },
+          },
         },
       }),
       prisma.application.count({ where }),

@@ -12,6 +12,7 @@ export const registerSchema = z.object({
   name: z.string().trim().min(2).max(60),
   email: z.string().trim().toLowerCase().email().max(254),
   password,
+  role: z.enum(["applicant", "employer"]).default("applicant"),
 });
 
 export const loginSchema = z.object({
@@ -25,7 +26,7 @@ const apiAppStatus = z.enum(["pending", "reviewed", "accepted", "rejected"]);
 
 export const jobCreateSchema = z.object({
   title: z.string().trim().min(3).max(120),
-  company: z.string().trim().min(2).max(80),
+  companyId: z.string().trim().min(1).optional(),
   location: z.string().trim().min(2).max(80),
   type: apiJobType,
   salaryRange: z.string().trim().max(60).nullable().optional(),
@@ -33,6 +34,26 @@ export const jobCreateSchema = z.object({
   requirements: z.string().trim().min(10).max(3000),
   status: apiJobStatus.default("open"),
 });
+
+export const companyCreateSchema = z.object({
+  slug: z
+    .string()
+    .trim()
+    .min(2)
+    .max(60)
+    .regex(/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/, "Use lowercase letters, numbers, and dashes"),
+  name: z.string().trim().min(2).max(80),
+  description: z.string().trim().max(500).nullable().optional(),
+  logoUrl: z.string().trim().url().max(2048).nullable().optional().or(z.literal("")),
+  website: z.string().trim().url().max(2048).nullable().optional().or(z.literal("")),
+  size: z.enum(["1-10", "11-50", "51-200", "201-1000", "1000+"]).nullable().optional(),
+  industry: z.string().trim().max(60).nullable().optional(),
+});
+
+export const companyUpdateSchema = companyCreateSchema.partial();
+
+export type CompanyCreateInput = z.infer<typeof companyCreateSchema>;
+export type CompanyUpdateInput = z.infer<typeof companyUpdateSchema>;
 
 export const jobUpdateSchema = jobCreateSchema.partial();
 

@@ -2,15 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { statusUpdateSchema, mapAppStatus } from "@/lib/validators";
-import { requireAdmin, HttpError } from "@/lib/rbac";
+import { requireCompanyMember, HttpError } from "@/lib/rbac";
 import { serializeApplication } from "@/lib/serialize";
 
 type Ctx = { params: Promise<{ id: string }> };
 
 export async function PUT(req: NextRequest, ctx: Ctx) {
   try {
-    await requireAdmin();
     const { id } = await ctx.params;
+    const application = await prisma.application.findUnique({
+      where: { id },
+      select: { id: true, job: { select: { companyId: true } } },
+    });
+    if (!application)
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    await requireCompanyMember(application.job.companyId);
+
     const body = await req.json().catch(() => null);
     const parsed = statusUpdateSchema.safeParse(body);
     if (!parsed.success) {
@@ -20,7 +27,7 @@ export async function PUT(req: NextRequest, ctx: Ctx) {
       );
     }
     try {
-      const application = await prisma.application.update({
+      const updated = await prisma.application.update({
         where: { id },
         data: { status: mapAppStatus(parsed.data.status) },
         include: {
@@ -36,7 +43,7 @@ export async function PUT(req: NextRequest, ctx: Ctx) {
         },
       });
       return NextResponse.json({
-        application: serializeApplication(application),
+        application: serializeApplication(updated),
       });
     } catch (e) {
       if (
