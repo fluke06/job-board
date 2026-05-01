@@ -1,4 +1,11 @@
-import { PrismaClient, Role, JobType, JobStatus, AppStatus } from "@prisma/client";
+import {
+  PrismaClient,
+  Role,
+  JobType,
+  JobStatus,
+  AppStatus,
+  CompanyMemberRole,
+} from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -6,6 +13,7 @@ const prisma = new PrismaClient();
 async function main() {
   const adminHash = await bcrypt.hash("Admin123!", 12);
   const userHash = await bcrypt.hash("Password123!", 12);
+  const employerHash = await bcrypt.hash("Employer123!", 12);
 
   const admin = await prisma.user.upsert({
     where: { email: "admin@example.com" },
@@ -20,10 +28,10 @@ async function main() {
 
   const alice = await prisma.user.upsert({
     where: { email: "alice@example.com" },
-    update: { passwordHash: userHash, name: "Alice", role: Role.APPLICANT },
+    update: { passwordHash: userHash, name: "Alice Tan", role: Role.APPLICANT },
     create: {
       email: "alice@example.com",
-      name: "Alice",
+      name: "Alice Tan",
       passwordHash: userHash,
       role: Role.APPLICANT,
     },
@@ -31,30 +39,111 @@ async function main() {
 
   const bob = await prisma.user.upsert({
     where: { email: "bob@example.com" },
-    update: { passwordHash: userHash, name: "Bob", role: Role.APPLICANT },
+    update: { passwordHash: userHash, name: "Bob Reyes", role: Role.APPLICANT },
     create: {
       email: "bob@example.com",
-      name: "Bob",
+      name: "Bob Reyes",
       passwordHash: userHash,
       role: Role.APPLICANT,
     },
   });
 
-  const jobs: Array<{
+  const employerSeeds = [
+    {
+      email: "hiring@acme.com",
+      name: "Hannah Acme",
+      slug: "acme",
+      companyName: "Acme",
+      industry: "Software",
+      size: "51-200",
+      website: "https://acme.example.com",
+      description:
+        "Acme builds developer tooling for distributed teams. Founded 2018.",
+    },
+    {
+      email: "recruiter@lumen.com",
+      name: "Liam Lumen",
+      slug: "lumen",
+      companyName: "Lumen",
+      industry: "Design",
+      size: "11-50",
+      website: "https://lumen.example.com",
+      description:
+        "Lumen is a design studio shipping product surfaces for fast-growing startups.",
+    },
+    {
+      email: "talent@northwind.com",
+      name: "Nora Northwind",
+      slug: "northwind",
+      companyName: "Northwind",
+      industry: "Logistics",
+      size: "201-1000",
+      website: "https://northwind.example.com",
+      description:
+        "Northwind is a logistics platform connecting carriers and shippers across APAC.",
+    },
+  ];
+
+  const companies: Record<string, { id: string; userId: string }> = {};
+
+  for (const e of employerSeeds) {
+    const employer = await prisma.user.upsert({
+      where: { email: e.email },
+      update: { passwordHash: employerHash, name: e.name, role: Role.EMPLOYER },
+      create: {
+        email: e.email,
+        name: e.name,
+        passwordHash: employerHash,
+        role: Role.EMPLOYER,
+      },
+    });
+    const company = await prisma.company.upsert({
+      where: { slug: e.slug },
+      update: {
+        name: e.companyName,
+        industry: e.industry,
+        size: e.size,
+        website: e.website,
+        description: e.description,
+      },
+      create: {
+        slug: e.slug,
+        name: e.companyName,
+        industry: e.industry,
+        size: e.size,
+        website: e.website,
+        description: e.description,
+      },
+    });
+    await prisma.companyMember.upsert({
+      where: { userId_companyId: { userId: employer.id, companyId: company.id } },
+      update: { role: CompanyMemberRole.OWNER },
+      create: {
+        userId: employer.id,
+        companyId: company.id,
+        role: CompanyMemberRole.OWNER,
+      },
+    });
+    companies[e.slug] = { id: company.id, userId: employer.id };
+  }
+
+  type JobSeed = {
     id: string;
+    slug: keyof typeof companies | string;
     title: string;
-    company: string;
     location: string;
     type: JobType;
     salaryRange: string | null;
     description: string;
     requirements: string;
     status: JobStatus;
-  }> = [
+  };
+
+  const jobs: JobSeed[] = [
     {
       id: "seed_job_1",
+      slug: "acme",
       title: "Senior Backend Engineer",
-      company: "Acme Corp",
       location: "Manila",
       type: JobType.FULL_TIME,
       salaryRange: "$60k–$90k",
@@ -66,8 +155,8 @@ async function main() {
     },
     {
       id: "seed_job_2",
+      slug: "acme",
       title: "Full-Stack Engineer",
-      company: "Globex",
       location: "Singapore",
       type: JobType.FULL_TIME,
       salaryRange: "$55k–$80k",
@@ -78,8 +167,8 @@ async function main() {
     },
     {
       id: "seed_job_3",
+      slug: "lumen",
       title: "Frontend Engineer",
-      company: "Initech",
       location: "Tokyo",
       type: JobType.FULL_TIME,
       salaryRange: "¥7M–¥10M",
@@ -90,8 +179,8 @@ async function main() {
     },
     {
       id: "seed_job_4",
+      slug: "northwind",
       title: "Site Reliability Engineer",
-      company: "Hooli",
       location: "Manila",
       type: JobType.FULL_TIME,
       salaryRange: "$70k–$100k",
@@ -102,8 +191,8 @@ async function main() {
     },
     {
       id: "seed_job_5",
+      slug: "lumen",
       title: "Technical Writer",
-      company: "Pied Piper",
       location: "Remote",
       type: JobType.PART_TIME,
       salaryRange: "$40/hr",
@@ -114,8 +203,8 @@ async function main() {
     },
     {
       id: "seed_job_6",
+      slug: "acme",
       title: "QA Analyst",
-      company: "Massive Dynamic",
       location: "Singapore",
       type: JobType.PART_TIME,
       salaryRange: "$30/hr",
@@ -126,8 +215,8 @@ async function main() {
     },
     {
       id: "seed_job_7",
+      slug: "lumen",
       title: "UX Researcher",
-      company: "Stark Industries",
       location: "Tokyo",
       type: JobType.PART_TIME,
       salaryRange: "¥5M–¥7M",
@@ -138,8 +227,8 @@ async function main() {
     },
     {
       id: "seed_job_8",
+      slug: "northwind",
       title: "DevOps Engineer",
-      company: "Cyberdyne",
       location: "Remote",
       type: JobType.REMOTE,
       salaryRange: "$80k–$120k",
@@ -150,8 +239,8 @@ async function main() {
     },
     {
       id: "seed_job_9",
+      slug: "lumen",
       title: "Product Designer",
-      company: "Wayne Enterprises",
       location: "Remote",
       type: JobType.REMOTE,
       salaryRange: "$70k–$110k",
@@ -162,8 +251,8 @@ async function main() {
     },
     {
       id: "seed_job_10",
+      slug: "northwind",
       title: "Data Engineer",
-      company: "Soylent",
       location: "Remote",
       type: JobType.REMOTE,
       salaryRange: "$90k–$130k",
@@ -175,10 +264,33 @@ async function main() {
   ];
 
   for (const job of jobs) {
+    const c = companies[job.slug];
+    if (!c) throw new Error(`Missing company seed for slug ${job.slug}`);
     await prisma.job.upsert({
       where: { id: job.id },
-      update: { ...job, createdById: admin.id },
-      create: { ...job, createdById: admin.id },
+      update: {
+        title: job.title,
+        companyId: c.id,
+        location: job.location,
+        type: job.type,
+        salaryRange: job.salaryRange,
+        description: job.description,
+        requirements: job.requirements,
+        status: job.status,
+        createdById: c.userId,
+      },
+      create: {
+        id: job.id,
+        title: job.title,
+        companyId: c.id,
+        location: job.location,
+        type: job.type,
+        salaryRange: job.salaryRange,
+        description: job.description,
+        requirements: job.requirements,
+        status: job.status,
+        createdById: c.userId,
+      },
     });
   }
 
@@ -199,21 +311,21 @@ async function main() {
       jobId: "seed_job_2",
       userId: alice.id,
       coverLetter:
-        "Full-stack development is exactly where I thrive. The Globex tech stack is a perfect match for my skills and interests.",
+        "Full-stack development is exactly where I thrive. The Acme tech stack is a perfect match for my skills and interests.",
       status: AppStatus.ACCEPTED,
     },
     {
       jobId: "seed_job_3",
       userId: bob.id,
       coverLetter:
-        "I care deeply about polished, accessible UIs and have shipped React apps to production teams. I think I would be a strong fit at Initech.",
+        "I care deeply about polished, accessible UIs and have shipped React apps to production teams. I think I would be a strong fit at Lumen.",
       status: AppStatus.REVIEWED,
     },
     {
       jobId: "seed_job_8",
       userId: bob.id,
       coverLetter:
-        "I have built CI/CD pipelines, owned production infra, and love improving developer experience. Looking forward to talking about Cyberdyne.",
+        "I have built CI/CD pipelines, owned production infra, and love improving developer experience. Looking forward to talking about Northwind.",
       status: AppStatus.REJECTED,
     },
   ];
@@ -228,6 +340,7 @@ async function main() {
 
   const counts = {
     users: await prisma.user.count(),
+    companies: await prisma.company.count(),
     jobs: await prisma.job.count(),
     applications: await prisma.application.count(),
   };

@@ -9,6 +9,7 @@ datasource db {
 
 enum Role {
   APPLICANT
+  EMPLOYER
   ADMIN
 }
 
@@ -30,21 +31,57 @@ enum AppStatus {
   REJECTED
 }
 
+enum CompanyMemberRole {
+  OWNER
+  RECRUITER
+}
+
 model User {
-  id           String        @id @default(cuid())
+  id           String          @id @default(cuid())
   name         String
-  email        String        @unique
+  email        String          @unique
   passwordHash String
-  role         Role          @default(APPLICANT)
-  createdAt    DateTime      @default(now())
-  jobs         Job[]         @relation("JobsCreated")
+  role         Role            @default(APPLICANT)
+  createdAt    DateTime        @default(now())
+  jobs         Job[]           @relation("JobsCreated")
   applications Application[]
+  companies    CompanyMember[]
+}
+
+model Company {
+  id          String          @id @default(cuid())
+  slug        String          @unique
+  name        String
+  description String?
+  logoUrl     String?
+  website     String?
+  size        String?
+  industry    String?
+  createdAt   DateTime        @default(now())
+  members     CompanyMember[]
+  jobs        Job[]
+
+  @@index([slug])
+}
+
+model CompanyMember {
+  id        String            @id @default(cuid())
+  userId    String
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyId String
+  company   Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  role      CompanyMemberRole @default(OWNER)
+  joinedAt  DateTime          @default(now())
+
+  @@unique([userId, companyId])
+  @@index([companyId])
 }
 
 model Job {
   id           String        @id @default(cuid())
   title        String
-  company      String
+  companyId    String
+  company      Company       @relation(fields: [companyId], references: [id], onDelete: Cascade)
   location     String
   type         JobType
   salaryRange  String?
@@ -58,6 +95,7 @@ model Job {
 
   @@index([status, type, location])
   @@index([createdAt])
+  @@index([companyId])
 }
 
 model Application {
