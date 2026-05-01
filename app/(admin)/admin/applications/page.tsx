@@ -27,15 +27,21 @@ export default async function AdminApplicationsPage() {
     orderBy: { createdAt: "desc" },
     include: {
       user: { select: { id: true, name: true, email: true } },
-      job: { select: { id: true, title: true, company: true } },
+      job: {
+        select: {
+          id: true,
+          title: true,
+          company: { select: { id: true, slug: true, name: true } },
+        },
+      },
     },
   });
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 space-y-6">
-      <header>
-        <h1 className="text-2xl font-semibold">Applications</h1>
-        <p className="text-sm text-muted-foreground">
+    <div className="mx-auto w-full max-w-7xl px-4 py-12 md:px-8 md:py-16 space-y-8">
+      <header className="border-b border-border pb-8">
+        <h1>Applications</h1>
+        <p className="mt-2 text-body-lg text-muted-foreground">
           {items.length} {items.length === 1 ? "application" : "applications"}
         </p>
       </header>
@@ -73,7 +79,7 @@ export default async function AdminApplicationsPage() {
                       {a.job.title}
                     </Link>
                   </TableCell>
-                  <TableCell>{a.job.company}</TableCell>
+                  <TableCell>{a.job.company.name}</TableCell>
                   <TableCell>{dateFmt.format(a.createdAt)}</TableCell>
                   <TableCell>
                     <ApplicationStatusSelect

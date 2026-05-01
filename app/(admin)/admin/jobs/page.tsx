@@ -34,15 +34,18 @@ const TYPE_LABEL: Record<string, string> = {
 export default async function AdminJobsPage() {
   const jobs = await prisma.job.findMany({
     orderBy: { createdAt: "desc" },
-    include: { _count: { select: { applications: true } } },
+    include: {
+      company: { select: { id: true, slug: true, name: true } },
+      _count: { select: { applications: true } },
+    },
   });
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 space-y-6">
-      <header className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold">Jobs</h1>
-          <p className="text-sm text-muted-foreground">
+    <div className="mx-auto w-full max-w-7xl px-4 py-12 md:px-8 md:py-16 space-y-8">
+      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-8">
+        <div className="space-y-2">
+          <h1>Jobs</h1>
+          <p className="text-body-lg text-muted-foreground">
             {jobs.length} {jobs.length === 1 ? "job" : "jobs"}
           </p>
         </div>
@@ -73,7 +76,7 @@ export default async function AdminJobsPage() {
                     {j.title}
                   </Link>
                 </TableCell>
-                <TableCell>{j.company}</TableCell>
+                <TableCell>{j.company.name}</TableCell>
                 <TableCell>{j.location}</TableCell>
                 <TableCell>{TYPE_LABEL[mapJobTypeOut(j.type)]}</TableCell>
                 <TableCell>

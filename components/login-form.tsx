@@ -88,6 +88,7 @@ export function LoginForm() {
                 <Input
                   type="password"
                   autoComplete="current-password"
+                  placeholder="••••••••"
                   {...field}
                 />
               </FormControl>
@@ -97,15 +98,26 @@ export function LoginForm() {
         />
         <Button
           type="submit"
+          size="lg"
           className="w-full"
           disabled={form.formState.isSubmitting}
         >
-          {form.formState.isSubmitting ? "Logging in…" : "Log in"}
+          {form.formState.isSubmitting ? "Signing in…" : "Sign in"}
         </Button>
-        <p className="text-sm text-muted-foreground text-center">
-          No account?{" "}
-          <Link href="/register" className="font-medium hover:underline">
-            Register
+        <div className="relative flex items-center py-2">
+          <div className="flex-grow border-t border-border" />
+          <span className="mx-4 flex-shrink-0 text-small text-muted-foreground">
+            or
+          </span>
+          <div className="flex-grow border-t border-border" />
+        </div>
+        <p className="text-center text-small text-muted-foreground">
+          Don&apos;t have an account?{" "}
+          <Link
+            href="/register"
+            className="font-medium text-foreground hover:underline"
+          >
+            Sign up
           </Link>
         </p>
       </form>

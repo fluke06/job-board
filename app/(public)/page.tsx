@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+import { ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { JobStatus } from "@prisma/client";
 import { buttonVariants } from "@/components/ui/button";
@@ -9,9 +10,9 @@ import { mapJobTypeOut } from "@/lib/validators";
 export const revalidate = 60;
 
 export const metadata: Metadata = {
-  title: "Find your next role",
+  title: "Find work that fits",
   description:
-    "Browse curated full-time, part-time, and remote job openings and apply in minutes on JobBoard.",
+    "Curated full-time, part-time, and remote roles from companies hiring now. Apply in two clicks on JobBoard.",
   alternates: { canonical: "/" },
 };
 
@@ -20,41 +21,54 @@ export default async function HomePage() {
     where: { status: JobStatus.OPEN },
     orderBy: { createdAt: "desc" },
     take: 3,
+    include: {
+      company: { select: { id: true, slug: true, name: true } },
+    },
   });
 
   return (
-    <div className="mx-auto max-w-6xl px-4">
-      <section className="py-16 md:py-24 text-center">
-        <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-          Find your next role.
-        </h1>
-        <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-          Browse curated full-time, part-time, and remote opportunities.
+    <div className="w-full">
+      <section className="mx-auto flex max-w-3xl flex-col items-center px-4 pt-24 pb-16 text-center md:pt-32 md:pb-24">
+        <h1>Find work that fits.</h1>
+        <p className="mt-4 max-w-xl text-body-lg text-muted-foreground">
+          Curated full-time, part-time, and remote roles. Apply in two clicks.
         </p>
-        <div className="mt-8">
-          <Link href="/jobs" className={buttonVariants({ size: "lg" })}>
-            Browse Jobs
+        <div className="mt-8 flex items-center gap-3">
+          <Link href="/jobs" className={buttonVariants({ size: "default" })}>
+            Browse jobs
+          </Link>
+          <Link
+            href="/register"
+            className={buttonVariants({ variant: "outline", size: "default" })}
+          >
+            Sign up
           </Link>
         </div>
       </section>
 
-      <section aria-labelledby="recent-jobs">
-        <div className="flex items-baseline justify-between mb-4">
-          <h2 id="recent-jobs" className="text-2xl font-semibold">
-            Recent openings
-          </h2>
-          <Link href="/jobs" className="text-sm font-medium hover:underline">
-            See all →
+      <section
+        className="mx-auto w-full max-w-7xl px-4 pb-24 md:px-8"
+        aria-labelledby="recent-jobs"
+      >
+        <div className="mb-8 flex items-end justify-between">
+          <h2 id="recent-jobs">Recently posted</h2>
+          <Link
+            href="/jobs"
+            className="inline-flex items-center gap-1 text-small text-muted-foreground hover:text-foreground"
+          >
+            View all jobs
+            <ArrowRight className="size-4" strokeWidth={1.75} aria-hidden="true" />
           </Link>
         </div>
-        <div className="grid gap-4 md:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {recent.map((job) => (
             <JobCard
               key={job.id}
               job={{
                 id: job.id,
                 title: job.title,
-                company: job.company,
+                company: job.company.name,
+                companySlug: job.company.slug,
                 location: job.location,
                 type: mapJobTypeOut(job.type),
                 salaryRange: job.salaryRange,

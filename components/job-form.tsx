@@ -27,7 +27,7 @@ import {
 
 const formSchema = z.object({
   title: z.string().trim().min(3).max(120),
-  company: z.string().trim().min(2).max(80),
+  companyId: z.string().trim().min(1, "Pick a company"),
   location: z.string().trim().min(2).max(80),
   type: z.enum(["full-time", "part-time", "remote"]),
   salaryRange: z.string().trim().max(60).optional(),
@@ -42,7 +42,7 @@ export type JobFormDefaults = Partial<FormValues>;
 
 const EMPTY_DEFAULTS: FormValues = {
   title: "",
-  company: "",
+  companyId: "",
   location: "",
   type: "full-time",
   salaryRange: "",
@@ -51,14 +51,26 @@ const EMPTY_DEFAULTS: FormValues = {
   status: "open",
 };
 
+export type CompanyOption = { id: string; name: string };
+
 export function JobForm({
   mode,
   jobId,
   defaultValues,
+  companies,
+  endpoint,
+  cancelHref = "/admin/jobs",
+  successHref = "/admin/jobs",
+  hideCompany = false,
 }: {
   mode: "create" | "edit";
   jobId?: string;
   defaultValues?: JobFormDefaults;
+  companies?: CompanyOption[];
+  endpoint?: { create: string; update: (id: string) => string };
+  cancelHref?: string;
+  successHref?: string;
+  hideCompany?: boolean;
 }) {
   const router = useRouter();
   const form = useForm<FormValues>({
@@ -71,7 +83,9 @@ export function JobForm({
       ...values,
       salaryRange: values.salaryRange?.trim() ? values.salaryRange.trim() : null,
     };
-    const url = mode === "create" ? "/api/jobs" : `/api/jobs/${jobId}`;
+    const createUrl = endpoint?.create ?? "/api/jobs";
+    const updateUrl = endpoint?.update ?? ((id: string) => `/api/jobs/${id}`);
+    const url = mode === "create" ? createUrl : updateUrl(jobId!);
     const method = mode === "create" ? "POST" : "PUT";
     const res = await fetch(url, {
       method,
@@ -80,7 +94,7 @@ export function JobForm({
     });
     if (res.ok) {
       toast.success(mode === "create" ? "Job created" : "Job updated");
-      router.push("/admin/jobs");
+      router.push(successHref);
       router.refresh();
       return;
     }
@@ -105,19 +119,35 @@ export function JobForm({
           )}
         />
         <div className="grid gap-4 sm:grid-cols-2">
-          <FormField
-            control={form.control}
-            name="company"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Company</FormLabel>
-                <FormControl>
-                  <Input {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {!hideCompany && companies ? (
+            <FormField
+              control={form.control}
+              name="companyId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Company</FormLabel>
+                  <Select
+                    value={field.value || undefined}
+                    onValueChange={(v) => field.onChange(v ?? "")}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Pick a company" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {companies.map((c) => (
+                        <SelectItem key={c.id} value={c.id}>
+                          {c.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          ) : null}
           <FormField
             control={form.control}
             name="location"
@@ -141,9 +171,7 @@ export function JobForm({
                 <FormLabel>Type</FormLabel>
                 <Select
                   value={field.value}
-                  onValueChange={(v) =>
-                    field.onChange(v ?? "full-time")
-                  }
+                  onValueChange={(v) => field.onChange(v ?? "full-time")}
                 >
                   <FormControl>
                     <SelectTrigger>
@@ -235,7 +263,7 @@ export function JobForm({
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.push("/admin/jobs")}
+            onClick={() => router.push(cancelHref)}
           >
             Cancel
           </Button>

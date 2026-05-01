@@ -1,22 +1,47 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import {
+  ArrowLeft,
+  Briefcase,
+  Building2,
+  ChevronRight,
+  Clock,
+  DollarSign,
+  Globe,
+  MapPin,
+} from "lucide-react";
 import { Role, JobStatus, JobType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
-import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
 import { ApplyDialog } from "@/components/apply-dialog";
 import { StatusBadge } from "@/components/status-badge";
 import { mapAppStatusOut, mapJobTypeOut } from "@/lib/validators";
 import { DeleteJobButton } from "@/components/delete-job-button";
+import { cn } from "@/lib/utils";
 
 const TYPE_LABEL: Record<string, string> = {
   "full-time": "Full-time",
   "part-time": "Part-time",
   remote: "Remote",
 };
+
+const dateFmt = new Intl.DateTimeFormat("en-US", {
+  month: "long",
+  day: "numeric",
+  year: "numeric",
+});
+
+function relativePosted(d: Date): string {
+  const ms = Date.now() - d.getTime();
+  const day = 24 * 60 * 60 * 1000;
+  if (ms < day) return "Posted today";
+  if (ms < 2 * day) return "Posted yesterday";
+  const days = Math.floor(ms / day);
+  if (days < 30) return `Posted ${days}d ago`;
+  return `Posted ${dateFmt.format(d)}`;
+}
 
 export const revalidate = 60;
 
@@ -34,19 +59,23 @@ export async function generateMetadata({
   const { id } = await params;
   const job = await prisma.job.findUnique({
     where: { id },
-    select: { title: true, company: true, description: true },
+    select: {
+      title: true,
+      description: true,
+      company: { select: { name: true } },
+    },
   });
   if (!job) {
     return { title: "Job not found" };
   }
   const description = truncateForDescription(job.description);
   return {
-    title: `${job.title} at ${job.company}`,
+    title: `${job.title} at ${job.company.name}`,
     description,
     alternates: { canonical: `/jobs/${id}` },
     openGraph: {
       type: "article",
-      title: `${job.title} at ${job.company}`,
+      title: `${job.title} at ${job.company.name}`,
       description,
       url: `/jobs/${id}`,
     },
@@ -70,7 +99,12 @@ export default async function JobDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const job = await prisma.job.findUnique({ where: { id } });
+  const job = await prisma.job.findUnique({
+    where: { id },
+    include: {
+      company: { select: { id: true, slug: true, name: true, logoUrl: true } },
+    },
+  });
   if (!job) notFound();
 
   const session = await getSession();
@@ -111,7 +145,7 @@ export default async function JobDetailPage({
     employmentType: employmentType(job.type),
     hiringOrganization: {
       "@type": "Organization",
-      name: job.company,
+      name: job.company.name,
     },
     jobLocation: {
       "@type": "Place",
@@ -132,8 +166,11 @@ export default async function JobDetailPage({
     };
   }
 
+  const canApply =
+    !!session && !isAdmin && !myApplication && job.status === JobStatus.OPEN;
+
   return (
-    <article className="mx-auto max-w-3xl px-4 py-8 space-y-6">
+    <article className="mx-auto w-full max-w-4xl px-4 py-10 md:px-8 md:py-16 space-y-8">
       <script
         type="application/ld+json"
         suppressHydrationWarning
@@ -141,68 +178,157 @@ export default async function JobDetailPage({
           __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
         }}
       />
-      <header className="space-y-2">
-        <div className="flex items-start justify-between gap-4 flex-wrap">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">{job.title}</h1>
-            <p className="text-lg text-muted-foreground">{job.company}</p>
-          </div>
-          <div className="flex flex-wrap gap-2 items-center">
-            <Badge variant="secondary">{TYPE_LABEL[apiType]}</Badge>
-            <Badge variant="outline">{job.location}</Badge>
-            {job.status === JobStatus.CLOSED ? (
-              <Badge variant="destructive">Closed</Badge>
-            ) : null}
+
+      <nav
+        aria-label="Breadcrumb"
+        className="hidden items-center gap-2 text-small text-muted-foreground md:flex"
+      >
+        <Link href="/jobs" className="hover:text-foreground transition-colors">
+          Jobs
+        </Link>
+        <ChevronRight className="size-4" strokeWidth={1.75} aria-hidden="true" />
+        <span className="font-medium text-foreground">{job.title}</span>
+      </nav>
+      <Link
+        href="/jobs"
+        className="inline-flex items-center gap-1.5 text-small text-muted-foreground hover:text-foreground md:hidden"
+      >
+        <ArrowLeft className="size-4" strokeWidth={1.75} aria-hidden="true" />
+        Back to jobs
+      </Link>
+
+      {canApply ? (
+        <section className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-card p-5 shadow-sm">
+          <h2 className="text-h3 font-semibold">Ready to apply?</h2>
+          <ApplyDialog jobId={job.id} />
+        </section>
+      ) : null}
+
+      <header className="space-y-6 border-b border-border pb-8">
+        <div className="flex items-start gap-4">
+          <Link
+            href={`/companies/${job.company.slug}`}
+            aria-label={`${job.company.name} profile`}
+            className="flex size-12 shrink-0 items-center justify-center rounded-md border border-border bg-muted"
+          >
+            <Building2
+              className="size-5 text-muted-foreground"
+              strokeWidth={1.75}
+              aria-hidden="true"
+            />
+          </Link>
+          <div className="min-w-0 space-y-2">
+            <Link
+              href={`/companies/${job.company.slug}`}
+              className="text-small text-muted-foreground hover:text-foreground"
+            >
+              {job.company.name}
+            </Link>
+            <h1 className="leading-tight">{job.title}</h1>
+            <p className="text-small text-muted-foreground">
+              {relativePosted(job.createdAt)}
+            </p>
           </div>
         </div>
-        {job.salaryRange ? (
-          <p className="text-sm text-foreground/80">
-            Salary: {job.salaryRange}
-          </p>
-        ) : null}
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-caption uppercase",
+              apiType === "remote"
+                ? "bg-primary text-primary-foreground"
+                : "border border-border text-foreground",
+            )}
+          >
+            {apiType === "remote" ? (
+              <Globe
+                className="size-3"
+                strokeWidth={1.75}
+                aria-hidden="true"
+              />
+            ) : (
+              <Briefcase
+                className="size-3"
+                strokeWidth={1.75}
+                aria-hidden="true"
+              />
+            )}
+            {TYPE_LABEL[apiType]}
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-caption uppercase">
+            <MapPin className="size-3" strokeWidth={1.75} aria-hidden="true" />
+            {job.location}
+          </span>
+          {job.salaryRange ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-caption uppercase">
+              <DollarSign
+                className="size-3"
+                strokeWidth={1.75}
+                aria-hidden="true"
+              />
+              {job.salaryRange}
+            </span>
+          ) : null}
+          {job.status === JobStatus.CLOSED ? (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-status-pending-bg px-3 py-1 text-caption uppercase text-status-pending-text">
+              <Clock
+                className="size-3"
+                strokeWidth={1.75}
+                aria-hidden="true"
+              />
+              Closed
+            </span>
+          ) : null}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-3">
+          {!session ? (
+            <Link
+              href={`/login?next=/jobs/${job.id}`}
+              className={buttonVariants({ size: "default" })}
+            >
+              Sign in to apply
+            </Link>
+          ) : isAdmin ? (
+            <>
+              <Link
+                href={`/admin/jobs/${job.id}/edit`}
+                className={buttonVariants({ variant: "outline" })}
+              >
+                Edit
+              </Link>
+              <DeleteJobButton jobId={job.id} />
+            </>
+          ) : myApplication ? (
+            <div className="flex items-center gap-2">
+              <span className="text-small text-muted-foreground">
+                Your application:
+              </span>
+              <StatusBadge status={myApplication.status} />
+            </div>
+          ) : job.status === JobStatus.OPEN ? (
+            <ApplyDialog jobId={job.id} />
+          ) : (
+            <p className="text-small text-muted-foreground">
+              This job is no longer accepting applications.
+            </p>
+          )}
+        </div>
       </header>
 
-      <Card>
-        <CardContent className="prose prose-sm max-w-none whitespace-pre-line py-6">
-          <h2 className="text-base font-semibold">Description</h2>
-          <p>{job.description}</p>
-          <h2 className="text-base font-semibold mt-4">Requirements</h2>
-          <p>{job.requirements}</p>
-        </CardContent>
-      </Card>
-
-      <div className="flex items-center gap-3 flex-wrap">
-        {!session ? (
-          <Link
-            href={`/login?next=/jobs/${job.id}`}
-            className={buttonVariants()}
-          >
-            Log in to apply
-          </Link>
-        ) : isAdmin ? (
-          <>
-            <Link
-              href={`/admin/jobs/${job.id}/edit`}
-              className={buttonVariants({ variant: "outline" })}
-            >
-              Edit
-            </Link>
-            <DeleteJobButton jobId={job.id} />
-          </>
-        ) : myApplication ? (
-          <div className="flex items-center gap-2">
-            <span className="text-sm text-muted-foreground">
-              Your application:
-            </span>
-            <StatusBadge status={myApplication.status} />
+      <div className="space-y-10">
+        <section className="space-y-3">
+          <h2 className="text-h4 font-semibold">About the role</h2>
+          <div className="space-y-4 whitespace-pre-line text-body text-foreground/80">
+            <p>{job.description}</p>
           </div>
-        ) : job.status === JobStatus.OPEN ? (
-          <ApplyDialog jobId={job.id} />
-        ) : (
-          <p className="text-sm text-muted-foreground">
-            This job is no longer accepting applications.
-          </p>
-        )}
+        </section>
+        <section className="space-y-3">
+          <h2 className="text-h4 font-semibold">Requirements</h2>
+          <div className="space-y-4 whitespace-pre-line text-body text-foreground/80">
+            <p>{job.requirements}</p>
+          </div>
+        </section>
       </div>
     </article>
   );

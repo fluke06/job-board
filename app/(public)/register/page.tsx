@@ -1,15 +1,22 @@
 import { RegisterForm } from "@/components/register-form";
 
 export const metadata = {
-  title: "Register | JobBoard",
-  description: "Create a JobBoard account to apply for jobs and track your applications.",
+  title: "Create an account",
+  description: "Join JobBoard to apply for roles or post jobs in seconds.",
 };
 
 export default function RegisterPage() {
   return (
-    <div className="mx-auto max-w-md px-4 py-12">
-      <h1 className="text-2xl font-semibold mb-6">Create your account</h1>
-      <RegisterForm />
+    <div className="mx-auto flex w-full max-w-md flex-col px-4 py-16 md:py-24">
+      <div className="rounded-xl border border-border bg-card p-8">
+        <div className="mb-6 text-center">
+          <h1 className="text-h3 font-semibold">Create an account</h1>
+          <p className="mt-2 text-small text-muted-foreground">
+            Join JobBoard to apply for roles or post jobs in seconds.
+          </p>
+        </div>
+        <RegisterForm />
+      </div>
     </div>
   );
 }

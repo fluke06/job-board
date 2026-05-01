@@ -31,12 +31,12 @@ export default async function AdminOverviewPage() {
   ];
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 space-y-6">
-      <header className="flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold">Admin overview</h1>
-          <p className="text-sm text-muted-foreground">
-            Manage jobs and review applications.
+    <div className="mx-auto w-full max-w-7xl px-4 py-12 md:px-8 md:py-16">
+      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-8">
+        <div className="space-y-2">
+          <h1>Admin overview</h1>
+          <p className="text-body-lg text-muted-foreground">
+            Manage jobs and review applications across the platform.
           </p>
         </div>
         <div className="flex gap-2">
@@ -55,11 +55,13 @@ export default async function AdminOverviewPage() {
         </div>
       </header>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((c) => (
           <Card key={c.label}>
-            <CardHeader>
-              <CardDescription>{c.label}</CardDescription>
+            <CardHeader className="space-y-1">
+              <CardDescription className="text-caption">
+                {c.label}
+              </CardDescription>
               <CardTitle className="text-3xl">{c.value}</CardTitle>
             </CardHeader>
             <CardContent />

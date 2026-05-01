@@ -14,7 +14,13 @@ export default async function EditJobPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const job = await prisma.job.findUnique({ where: { id } });
+  const [job, companies] = await Promise.all([
+    prisma.job.findUnique({ where: { id } }),
+    prisma.company.findMany({
+      orderBy: { name: "asc" },
+      select: { id: true, name: true },
+    }),
+  ]);
   if (!job) notFound();
 
   return (
@@ -23,9 +29,10 @@ export default async function EditJobPage({
       <JobForm
         mode="edit"
         jobId={job.id}
+        companies={companies}
         defaultValues={{
           title: job.title,
-          company: job.company,
+          companyId: job.companyId,
           location: job.location,
           type: mapJobTypeOut(job.type),
           salaryRange: job.salaryRange ?? "",

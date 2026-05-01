@@ -1,7 +1,6 @@
 import Link from "next/link";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { MapPin, Briefcase } from "lucide-react";
+import { ArrowRight, MapPin, DollarSign } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const TYPE_LABEL: Record<string, string> = {
   "full-time": "Full-time",
@@ -16,42 +15,76 @@ export function JobCard({
     id: string;
     title: string;
     company: string;
+    companySlug?: string;
     location: string;
     type: "full-time" | "part-time" | "remote";
     salaryRange?: string | null;
   };
 }) {
+  const isRemote = job.type === "remote";
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader>
-        <CardTitle className="text-lg">
-          <Link href={`/jobs/${job.id}`} className="hover:underline">
-            {job.title}
+    <article className="group flex flex-col rounded-lg border border-border bg-card p-6 transition-shadow duration-200 hover:shadow-sm">
+      <div className="flex items-center justify-between gap-3">
+        {job.companySlug ? (
+          <Link
+            href={`/companies/${job.companySlug}`}
+            className="text-small text-muted-foreground hover:text-foreground"
+          >
+            {job.company}
           </Link>
-        </CardTitle>
-        <div className="text-sm text-muted-foreground">{job.company}</div>
-      </CardHeader>
-      <CardContent className="flex-1 flex flex-col justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-          <span className="inline-flex items-center gap-1">
-            <MapPin className="h-3.5 w-3.5" aria-hidden="true" />
-            {job.location}
+        ) : (
+          <span className="text-small text-muted-foreground">
+            {job.company}
           </span>
-          <Badge variant="secondary" className="inline-flex items-center gap-1">
-            <Briefcase className="h-3 w-3" aria-hidden="true" />
-            {TYPE_LABEL[job.type]}
-          </Badge>
-          {job.salaryRange ? (
-            <span className="text-foreground/80">{job.salaryRange}</span>
-          ) : null}
-        </div>
+        )}
+        <span
+          className={cn(
+            "rounded-full px-2 py-1 text-caption uppercase",
+            isRemote
+              ? "bg-primary text-primary-foreground"
+              : "border border-border text-foreground",
+          )}
+        >
+          {TYPE_LABEL[job.type]}
+        </span>
+      </div>
+      <h3 className="mt-3 text-h4 font-semibold leading-tight">
         <Link
           href={`/jobs/${job.id}`}
-          className="text-sm font-medium hover:underline"
+          className="hover:underline focus-visible:outline-none"
         >
-          View →
+          {job.title}
         </Link>
-      </CardContent>
-    </Card>
+      </h3>
+      <div className="mt-4 flex flex-wrap gap-3 text-small text-muted-foreground">
+        <span className="inline-flex items-center gap-1">
+          <MapPin className="size-4" strokeWidth={1.75} aria-hidden="true" />
+          {job.location}
+        </span>
+        {job.salaryRange ? (
+          <span className="inline-flex items-center gap-1">
+            <DollarSign
+              className="size-4"
+              strokeWidth={1.75}
+              aria-hidden="true"
+            />
+            {job.salaryRange}
+          </span>
+        ) : null}
+      </div>
+      <div className="mt-4 flex justify-end">
+        <Link
+          href={`/jobs/${job.id}`}
+          className="inline-flex items-center gap-1 text-small text-muted-foreground transition-colors hover:text-foreground"
+        >
+          View role
+          <ArrowRight
+            className="size-4"
+            strokeWidth={1.75}
+            aria-hidden="true"
+          />
+        </Link>
+      </div>
+    </article>
   );
 }

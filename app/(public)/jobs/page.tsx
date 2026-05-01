@@ -13,7 +13,7 @@ export const revalidate = 60;
 export const metadata: Metadata = {
   title: "Browse jobs",
   description:
-    "Search and filter open job postings by type and location. Apply directly through JobBoard in just a few clicks.",
+    "Search and filter open job postings by type and location. Apply directly through JobBoard in a few clicks.",
   alternates: { canonical: "/jobs" },
 };
 
@@ -50,7 +50,7 @@ export default async function JobsPage({
     if (parsed.data.q) {
       where.OR = [
         { title: { contains: parsed.data.q } },
-        { company: { contains: parsed.data.q } },
+        { company: { name: { contains: parsed.data.q } } },
         { description: { contains: parsed.data.q } },
       ];
     }
@@ -65,6 +65,9 @@ export default async function JobsPage({
       orderBy: { createdAt: "desc" },
       skip: (page - 1) * pageSize,
       take: pageSize,
+      include: {
+        company: { select: { id: true, slug: true, name: true } },
+      },
     }),
     prisma.job.count({ where }),
   ]);
@@ -72,6 +75,8 @@ export default async function JobsPage({
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const hasPrev = page > 1;
   const hasNext = page < totalPages;
+  const start = total === 0 ? 0 : (page - 1) * pageSize + 1;
+  const end = Math.min(page * pageSize, total);
 
   function buildHref(targetPage: number) {
     const next = new URLSearchParams();
@@ -83,73 +88,83 @@ export default async function JobsPage({
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8 grid gap-8 md:grid-cols-[260px_1fr]">
-      <aside>
-        <JobFilters />
-      </aside>
-      <section>
-        <header className="mb-4 flex items-baseline justify-between">
-          <h1 className="text-2xl font-semibold">Jobs</h1>
-          <p className="text-sm text-muted-foreground">
-            {total} {total === 1 ? "result" : "results"}
-          </p>
-        </header>
+    <div className="mx-auto w-full max-w-7xl px-4 py-12 md:px-8 md:py-16">
+      <header className="border-b border-border pb-8">
+        <h1>Browse jobs</h1>
+        <p className="mt-2 text-body-lg text-muted-foreground">
+          {total === 0
+            ? "No open positions match your filters."
+            : `Showing ${start}–${end} of ${total} open ${total === 1 ? "position" : "positions"}.`}
+        </p>
+      </header>
 
-        {items.length === 0 ? (
-          <div className="rounded-lg border p-12 text-center text-muted-foreground">
-            No jobs match your filters.
-          </div>
-        ) : (
-          <div className="grid gap-4 md:grid-cols-2">
-            {items.map((job) => (
-              <JobCard
-                key={job.id}
-                job={{
-                  id: job.id,
-                  title: job.title,
-                  company: job.company,
-                  location: job.location,
-                  type: mapJobTypeOut(job.type),
-                  salaryRange: job.salaryRange,
-                }}
-              />
-            ))}
-          </div>
-        )}
+      <div className="mt-8 grid gap-8 md:grid-cols-[280px_1fr]">
+        <aside>
+          <JobFilters />
+        </aside>
+        <section>
+          {items.length === 0 ? (
+            <div className="rounded-lg border border-border p-12 text-center text-muted-foreground">
+              <p className="text-h4 font-semibold text-foreground">
+                No jobs match your filters
+              </p>
+              <p className="mt-2 text-small">
+                Try removing a filter or clearing your search.
+              </p>
+            </div>
+          ) : (
+            <div className="grid gap-4 md:grid-cols-2">
+              {items.map((job) => (
+                <JobCard
+                  key={job.id}
+                  job={{
+                    id: job.id,
+                    title: job.title,
+                    company: job.company.name,
+                    companySlug: job.company.slug,
+                    location: job.location,
+                    type: mapJobTypeOut(job.type),
+                    salaryRange: job.salaryRange,
+                  }}
+                />
+              ))}
+            </div>
+          )}
 
-        {totalPages > 1 ? (
-          <nav
-            aria-label="Pagination"
-            className="mt-8 flex items-center justify-between"
-          >
-            <Link
-              href={hasPrev ? buildHref(page - 1) : "#"}
-              aria-disabled={!hasPrev}
-              tabIndex={hasPrev ? undefined : -1}
-              className={cn(
-                buttonVariants({ variant: "outline" }),
-                !hasPrev && "pointer-events-none opacity-50",
-              )}
+          {totalPages > 1 ? (
+            <nav
+              aria-label="Pagination"
+              className="mt-8 flex items-center justify-between"
             >
-              Previous
-            </Link>
-            <span className="text-sm text-muted-foreground">
-              Page {page} of {totalPages}
-            </span>
-            <Link
-              href={hasNext ? buildHref(page + 1) : "#"}
-              aria-disabled={!hasNext}
-              tabIndex={hasNext ? undefined : -1}
-              className={cn(
-                buttonVariants({ variant: "outline" }),
-                !hasNext && "pointer-events-none opacity-50",
-              )}
-            >
-              Next
-            </Link>
-          </nav>
-        ) : null}
-      </section>
+              <Link
+                href={hasPrev ? buildHref(page - 1) : "#"}
+                aria-disabled={!hasPrev}
+                tabIndex={hasPrev ? undefined : -1}
+                className={cn(
+                  buttonVariants({ variant: "outline" }),
+                  !hasPrev && "pointer-events-none opacity-50",
+                )}
+              >
+                Previous
+              </Link>
+              <span className="text-small text-muted-foreground">
+                Page {page} of {totalPages}
+              </span>
+              <Link
+                href={hasNext ? buildHref(page + 1) : "#"}
+                aria-disabled={!hasNext}
+                tabIndex={hasNext ? undefined : -1}
+                className={cn(
+                  buttonVariants({ variant: "outline" }),
+                  !hasNext && "pointer-events-none opacity-50",
+                )}
+              >
+                Next
+              </Link>
+            </nav>
+          ) : null}
+        </section>
+      </div>
     </div>
   );
 }
