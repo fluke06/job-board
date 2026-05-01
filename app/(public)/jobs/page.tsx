@@ -1,0 +1,155 @@
+import Link from "next/link";
+import type { Metadata } from "next";
+import { Prisma, JobStatus } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
+import { JobCard } from "@/components/job-card";
+import { JobFilters } from "@/components/job-filters";
+import { listJobsQuery, mapJobType, mapJobTypeOut } from "@/lib/validators";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: "Browse jobs",
+  description:
+    "Search and filter open job postings by type and location. Apply directly through JobBoard in just a few clicks.",
+  alternates: { canonical: "/jobs" },
+};
+
+type SearchParams = { [k: string]: string | string[] | undefined };
+
+function flatten(sp: SearchParams): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [k, v] of Object.entries(sp)) {
+    if (Array.isArray(v)) {
+      if (v[0] !== undefined) out[k] = v[0];
+    } else if (typeof v === "string") {
+      out[k] = v;
+    }
+  }
+  return out;
+}
+
+export default async function JobsPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const sp = await searchParams;
+  const parsed = listJobsQuery.safeParse(flatten(sp));
+  const params = parsed.success
+    ? parsed.data
+    : { page: 1, pageSize: 10 as const };
+
+  const where: Prisma.JobWhereInput = { status: JobStatus.OPEN };
+  if (parsed.success) {
+    if (parsed.data.type) where.type = mapJobType(parsed.data.type);
+    if (parsed.data.location)
+      where.location = { contains: parsed.data.location };
+    if (parsed.data.q) {
+      where.OR = [
+        { title: { contains: parsed.data.q } },
+        { company: { contains: parsed.data.q } },
+        { description: { contains: parsed.data.q } },
+      ];
+    }
+  }
+
+  const page = params.page;
+  const pageSize = params.pageSize;
+
+  const [items, total] = await Promise.all([
+    prisma.job.findMany({
+      where,
+      orderBy: { createdAt: "desc" },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+    }),
+    prisma.job.count({ where }),
+  ]);
+
+  const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const hasPrev = page > 1;
+  const hasNext = page < totalPages;
+
+  function buildHref(targetPage: number) {
+    const next = new URLSearchParams();
+    for (const [k, v] of Object.entries(sp)) {
+      if (typeof v === "string" && k !== "page") next.set(k, v);
+    }
+    next.set("page", String(targetPage));
+    return `/jobs?${next.toString()}`;
+  }
+
+  return (
+    <div className="mx-auto max-w-6xl px-4 py-8 grid gap-8 md:grid-cols-[260px_1fr]">
+      <aside>
+        <JobFilters />
+      </aside>
+      <section>
+        <header className="mb-4 flex items-baseline justify-between">
+          <h1 className="text-2xl font-semibold">Jobs</h1>
+          <p className="text-sm text-muted-foreground">
+            {total} {total === 1 ? "result" : "results"}
+          </p>
+        </header>
+
+        {items.length === 0 ? (
+          <div className="rounded-lg border p-12 text-center text-muted-foreground">
+            No jobs match your filters.
+          </div>
+        ) : (
+          <div className="grid gap-4 md:grid-cols-2">
+            {items.map((job) => (
+              <JobCard
+                key={job.id}
+                job={{
+                  id: job.id,
+                  title: job.title,
+                  company: job.company,
+                  location: job.location,
+                  type: mapJobTypeOut(job.type),
+                  salaryRange: job.salaryRange,
+                }}
+              />
+            ))}
+          </div>
+        )}
+
+        {totalPages > 1 ? (
+          <nav
+            aria-label="Pagination"
+            className="mt-8 flex items-center justify-between"
+          >
+            <Link
+              href={hasPrev ? buildHref(page - 1) : "#"}
+              aria-disabled={!hasPrev}
+              tabIndex={hasPrev ? undefined : -1}
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                !hasPrev && "pointer-events-none opacity-50",
+              )}
+            >
+              Previous
+            </Link>
+            <span className="text-sm text-muted-foreground">
+              Page {page} of {totalPages}
+            </span>
+            <Link
+              href={hasNext ? buildHref(page + 1) : "#"}
+              aria-disabled={!hasNext}
+              tabIndex={hasNext ? undefined : -1}
+              className={cn(
+                buttonVariants({ variant: "outline" }),
+                !hasNext && "pointer-events-none opacity-50",
+              )}
+            >
+              Next
+            </Link>
+          </nav>
+        ) : null}
+      </section>
+    </div>
+  );
+}

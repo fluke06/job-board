@@ -1,0 +1,76 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  APPLICANT
+  ADMIN
+}
+
+enum JobType {
+  FULL_TIME
+  PART_TIME
+  REMOTE
+}
+
+enum JobStatus {
+  OPEN
+  CLOSED
+}
+
+enum AppStatus {
+  PENDING
+  REVIEWED
+  ACCEPTED
+  REJECTED
+}
+
+model User {
+  id           String        @id @default(cuid())
+  name         String
+  email        String        @unique
+  passwordHash String
+  role         Role          @default(APPLICANT)
+  createdAt    DateTime      @default(now())
+  jobs         Job[]         @relation("JobsCreated")
+  applications Application[]
+}
+
+model Job {
+  id           String        @id @default(cuid())
+  title        String
+  company      String
+  location     String
+  type         JobType
+  salaryRange  String?
+  description  String
+  requirements String
+  status       JobStatus     @default(OPEN)
+  createdById  String
+  createdBy    User          @relation("JobsCreated", fields: [createdById], references: [id])
+  createdAt    DateTime      @default(now())
+  applications Application[]
+
+  @@index([status, type, location])
+  @@index([createdAt])
+}
+
+model Application {
+  id          String    @id @default(cuid())
+  jobId       String
+  job         Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  coverLetter String
+  resumeUrl   String?
+  status      AppStatus @default(PENDING)
+  createdAt   DateTime  @default(now())
+
+  @@unique([jobId, userId])
+  @@index([userId, createdAt])
+}
