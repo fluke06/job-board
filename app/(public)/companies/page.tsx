@@ -1,0 +1,134 @@
+import Link from "next/link";
+import type { Metadata } from "next";
+import { ArrowRight, Building2 } from "lucide-react";
+import { prisma } from "@/lib/prisma";
+import { JobStatus, Prisma } from "@prisma/client";
+import { CompaniesSearch } from "@/components/companies-search";
+
+export const revalidate = 60;
+
+export const metadata: Metadata = {
+  title: "Companies",
+  description: "Browse companies hiring on JobBoard.",
+  alternates: { canonical: "/companies" },
+};
+
+type SearchParams = { q?: string | string[] };
+
+function flatten(sp: SearchParams): string | undefined {
+  const v = sp.q;
+  if (Array.isArray(v)) return v[0];
+  return typeof v === "string" ? v : undefined;
+}
+
+export default async function CompaniesPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const sp = await searchParams;
+  const q = flatten(sp)?.trim();
+
+  const where: Prisma.CompanyWhereInput = q
+    ? {
+        OR: [
+          { name: { contains: q } },
+          { industry: { contains: q } },
+        ],
+      }
+    : {};
+
+  const companies = await prisma.company.findMany({
+    where,
+    orderBy: { name: "asc" },
+    include: {
+      _count: {
+        select: {
+          jobs: { where: { status: JobStatus.OPEN } },
+        },
+      },
+    },
+  });
+
+  return (
+    <div className="mx-auto w-full max-w-7xl px-4 py-12 md:px-8 md:py-16 space-y-12">
+      <header className="space-y-4">
+        <h1>Companies</h1>
+        <p className="max-w-2xl text-body-lg text-muted-foreground">
+          Browse companies hiring on JobBoard.
+        </p>
+      </header>
+
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <CompaniesSearch />
+        <p className="text-small text-muted-foreground">
+          Showing {companies.length}{" "}
+          {companies.length === 1 ? "company" : "companies"}
+          {q ? ` for “${q}”` : ""}
+        </p>
+      </div>
+
+      {companies.length === 0 ? (
+        <div className="rounded-lg border border-border p-12 text-center text-muted-foreground">
+          <p className="text-h4 font-semibold text-foreground">
+            {q ? "No companies match" : "No companies yet"}
+          </p>
+          <p className="mt-2 text-small">
+            {q ? "Try a different search term." : "Check back soon."}
+          </p>
+        </div>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {companies.map((c) => (
+            <Link
+              key={c.id}
+              href={`/companies/${c.slug}`}
+              className="group flex flex-col rounded-xl border border-border bg-card p-6 transition-shadow duration-200 hover:shadow-sm"
+            >
+              <div className="mb-4 flex items-center gap-4">
+                <div className="flex size-12 shrink-0 items-center justify-center rounded-lg border border-border bg-muted">
+                  <Building2
+                    className="size-5 text-muted-foreground"
+                    strokeWidth={1.75}
+                    aria-hidden="true"
+                  />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="text-h4 font-semibold leading-tight group-hover:underline">
+                    {c.name}
+                  </h3>
+                  {c.industry ? (
+                    <span className="text-caption text-muted-foreground">
+                      {c.industry}
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+              {c.description ? (
+                <p className="mb-6 line-clamp-2 flex-grow text-small text-muted-foreground">
+                  {c.description}
+                </p>
+              ) : (
+                <div className="mb-6 flex-grow" />
+              )}
+              <div className="mt-auto flex items-center justify-between">
+                <span className="rounded-full border border-border bg-muted px-2.5 py-1 text-caption text-muted-foreground">
+                  {c._count.jobs} open{" "}
+                  {c._count.jobs === 1 ? "role" : "roles"}
+                </span>
+                <span className="inline-flex items-center gap-1 text-small font-medium text-foreground group-hover:underline">
+                  View
+                  <ArrowRight
+                    className="size-4 transition-transform group-hover:translate-x-0.5"
+                    strokeWidth={1.75}
+                    aria-hidden="true"
+                  />
+                </span>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
