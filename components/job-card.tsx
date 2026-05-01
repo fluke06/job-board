@@ -38,12 +38,11 @@ export function JobCard({
           </span>
         )}
         <span
-          className={cn(
-            "rounded-full px-2 py-1 text-caption uppercase",
+          className={`inline-flex items-center rounded-full px-2.5 py-1 text-caption ${
             isRemote
               ? "bg-primary text-primary-foreground"
-              : "border border-border text-foreground",
-          )}
+              : "border border-border text-foreground"
+          }`}
         >
           {TYPE_LABEL[job.type]}
         </span>

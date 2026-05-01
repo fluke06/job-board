@@ -1,16 +1,7 @@
 import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import {
-  ArrowLeft,
-  Briefcase,
-  Building2,
-  ChevronRight,
-  Clock,
-  DollarSign,
-  Globe,
-  MapPin,
-} from "lucide-react";
+import { ArrowLeft, Building2, ChevronRight } from "lucide-react";
 import { Role, JobStatus, JobType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
@@ -233,49 +224,24 @@ export default async function JobDetailPage({
 
         <div className="flex flex-wrap items-center gap-2">
           <span
-            className={cn(
-              "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-caption uppercase",
+            className={`inline-flex items-center rounded-full px-2.5 py-1 text-caption ${
               apiType === "remote"
                 ? "bg-primary text-primary-foreground"
-                : "border border-border text-foreground",
-            )}
+                : "border border-border text-foreground"
+            }`}
           >
-            {apiType === "remote" ? (
-              <Globe
-                className="size-3"
-                strokeWidth={1.75}
-                aria-hidden="true"
-              />
-            ) : (
-              <Briefcase
-                className="size-3"
-                strokeWidth={1.75}
-                aria-hidden="true"
-              />
-            )}
             {TYPE_LABEL[apiType]}
           </span>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-caption uppercase">
-            <MapPin className="size-3" strokeWidth={1.75} aria-hidden="true" />
+          <span className="inline-flex items-center rounded-full border border-border px-2.5 py-1 text-caption">
             {job.location}
           </span>
           {job.salaryRange ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-muted px-3 py-1 text-caption uppercase">
-              <DollarSign
-                className="size-3"
-                strokeWidth={1.75}
-                aria-hidden="true"
-              />
+            <span className="inline-flex items-center rounded-full border border-border px-2.5 py-1 text-caption">
               {job.salaryRange}
             </span>
           ) : null}
           {job.status === JobStatus.CLOSED ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-status-pending-bg px-3 py-1 text-caption uppercase text-status-pending-text">
-              <Clock
-                className="size-3"
-                strokeWidth={1.75}
-                aria-hidden="true"
-              />
+            <span className="inline-flex items-center rounded-full bg-status-pending-bg px-2.5 py-1 text-caption text-status-pending-text">
               Closed
             </span>
           ) : null}
