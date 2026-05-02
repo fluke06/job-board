@@ -4,7 +4,7 @@ import { Role } from "@prisma/client";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { logEvent } from "@/lib/logger";
-import { EmployerSubnav } from "@/components/employer-subnav";
+import { EmployerSidebar } from "@/components/employer-sidebar";
 
 export default async function EmployerLayout({
   children,
@@ -17,8 +17,14 @@ export default async function EmployerLayout({
   const user = await prisma.user.findUnique({
     where: { id: session.userId },
     select: {
+      name: true,
       role: true,
-      companies: { select: { companyId: true } },
+      companies: {
+        select: {
+          companyId: true,
+          company: { select: { name: true } },
+        },
+      },
     },
   });
   if (!user) redirect("/login");
@@ -40,10 +46,24 @@ export default async function EmployerLayout({
     redirect("/employer/onboarding");
   }
 
+  if (onOnboarding) {
+    return (
+      <main id="main" className="flex-1 w-full">
+        {children}
+      </main>
+    );
+  }
+
+  const companyName = user.companies[0]?.company.name ?? "Your company";
+
   return (
-    <>
-      {onOnboarding ? null : <EmployerSubnav />}
-      {children}
-    </>
+    <div className="flex min-h-screen w-full flex-col md:flex-row">
+      <EmployerSidebar companyName={companyName} userName={user.name} />
+      <div className="flex-1 md:ml-60">
+        <main id="main" className="w-full">
+          {children}
+        </main>
+      </div>
+    </div>
   );
 }
