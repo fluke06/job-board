@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
+import { SiteShell } from "@/components/site-shell";
 
 export default async function AuthLayout({
   children,
@@ -8,5 +9,5 @@ export default async function AuthLayout({
 }) {
   const session = await getSession();
   if (!session) redirect("/login");
-  return <>{children}</>;
+  return <SiteShell>{children}</SiteShell>;
 }

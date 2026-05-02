@@ -3,6 +3,7 @@ import { Role } from "@prisma/client";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { logEvent } from "@/lib/logger";
+import { SiteShell } from "@/components/site-shell";
 
 export default async function AdminLayout({
   children,
@@ -21,5 +22,5 @@ export default async function AdminLayout({
     redirect("/");
   }
 
-  return <>{children}</>;
+  return <SiteShell>{children}</SiteShell>;
 }
