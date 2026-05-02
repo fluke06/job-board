@@ -6,6 +6,32 @@ import { Role } from "@prisma/client";
 import { LogoutButton } from "@/components/logout-button";
 import { buttonVariants } from "@/components/ui/button";
 
+type NavLink = { href: string; label: string };
+
+const GUEST_LINKS: NavLink[] = [
+  { href: "/jobs", label: "Browse jobs" },
+  { href: "/companies", label: "Companies" },
+  { href: "/for-employers", label: "For employers" },
+];
+
+const APPLICANT_LINKS: NavLink[] = [
+  { href: "/jobs", label: "Browse jobs" },
+  { href: "/companies", label: "Companies" },
+  { href: "/dashboard", label: "Dashboard" },
+];
+
+const EMPLOYER_LINKS: NavLink[] = [
+  { href: "/employer", label: "Dashboard" },
+  { href: "/jobs", label: "Browse jobs" },
+  { href: "/companies", label: "Companies" },
+];
+
+const ADMIN_LINKS: NavLink[] = [
+  { href: "/admin", label: "Admin" },
+  { href: "/jobs", label: "Browse jobs" },
+  { href: "/companies", label: "Companies" },
+];
+
 export async function Navbar() {
   const session = await getSession();
   const user = session
@@ -15,11 +41,13 @@ export async function Navbar() {
       })
     : null;
 
-  const navLinks: Array<{ href: string; label: string }> = [
-    { href: "/jobs", label: "Browse jobs" },
-    { href: "/companies", label: "Companies" },
-    { href: "/for-employers", label: "For employers" },
-  ];
+  const links: NavLink[] = !user
+    ? GUEST_LINKS
+    : user.role === Role.ADMIN
+      ? ADMIN_LINKS
+      : user.role === Role.EMPLOYER
+        ? EMPLOYER_LINKS
+        : APPLICANT_LINKS;
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -30,7 +58,7 @@ export async function Navbar() {
         </Link>
 
         <div className="hidden md:flex items-center gap-6">
-          {navLinks.map((l) => (
+          {links.map((l) => (
             <Link
               key={l.href}
               href={l.href}
@@ -44,28 +72,6 @@ export async function Navbar() {
         <div className="flex items-center gap-3">
           {user ? (
             <>
-              {user.role === Role.ADMIN ? (
-                <Link
-                  href="/admin"
-                  className="hidden text-small text-muted-foreground hover:text-foreground sm:inline-flex"
-                >
-                  Admin
-                </Link>
-              ) : user.role === Role.EMPLOYER ? (
-                <Link
-                  href="/employer"
-                  className="hidden text-small text-muted-foreground hover:text-foreground sm:inline-flex"
-                >
-                  Employer
-                </Link>
-              ) : (
-                <Link
-                  href="/dashboard"
-                  className="hidden text-small text-muted-foreground hover:text-foreground sm:inline-flex"
-                >
-                  Dashboard
-                </Link>
-              )}
               <span className="hidden text-small text-muted-foreground sm:inline">
                 {user.name}
               </span>
