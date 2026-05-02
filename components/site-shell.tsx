@@ -19,14 +19,23 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
             © {new Date().getFullYear()} JobBoard. Built for the future of work.
           </p>
           <nav className="flex flex-wrap items-center gap-6 text-small text-muted-foreground">
-            <a href="#" className="hover:text-foreground transition-colors">
+            <a
+              href="/privacy"
+              className="hover:text-foreground transition-colors"
+            >
               Privacy
             </a>
-            <a href="#" className="hover:text-foreground transition-colors">
+            <a
+              href="/terms"
+              className="hover:text-foreground transition-colors"
+            >
               Terms
             </a>
-            <a href="#" className="hover:text-foreground transition-colors">
-              Cookie policy
+            <a
+              href="/for-employers"
+              className="hover:text-foreground transition-colors"
+            >
+              For employers
             </a>
           </nav>
         </div>
