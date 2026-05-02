@@ -47,7 +47,7 @@ const TIERS = [
     blurb: "For early-stage teams hiring 1–2 roles.",
     features: ["Up to 3 active jobs", "Unlimited candidates", "Email support"],
     cta: "Start hiring",
-    href: "/register",
+    href: "/register?role=employer",
   },
   {
     name: "Growth",
@@ -60,7 +60,7 @@ const TIERS = [
       "Priority support",
     ],
     cta: "Get Growth",
-    href: "/register",
+    href: "/register?role=employer",
     highlighted: true,
   },
   {
@@ -70,7 +70,7 @@ const TIERS = [
     blurb: "For larger organizations with custom needs.",
     features: ["SSO + audit logs", "Custom integrations", "Dedicated CSM"],
     cta: "Talk to sales",
-    href: "/register",
+    href: "/register?role=employer",
   },
 ];
 
@@ -86,7 +86,7 @@ export default function ForEmployersPage() {
         </p>
         <div className="mt-8 flex items-center gap-3">
           <Link
-            href="/register"
+            href="/register?role=employer"
             className={buttonVariants({ size: "default" })}
           >
             Start hiring

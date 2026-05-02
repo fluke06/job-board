@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -59,7 +59,10 @@ const ROLE_OPTIONS: Array<{
 
 export function RegisterForm() {
   const router = useRouter();
-  const [role, setRole] = useState<Role>("applicant");
+  const params = useSearchParams();
+  const initialRole: Role =
+    params.get("role") === "employer" ? "employer" : "applicant";
+  const [role, setRole] = useState<Role>(initialRole);
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: { name: "", email: "", password: "" },

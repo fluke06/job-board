@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { RegisterForm } from "@/components/register-form";
 
 export const metadata = {
@@ -15,7 +16,9 @@ export default function RegisterPage() {
             Join JobBoard to apply for roles or post jobs in seconds.
           </p>
         </div>
-        <RegisterForm />
+        <Suspense fallback={null}>
+          <RegisterForm />
+        </Suspense>
       </div>
     </div>
   );
