@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Plus, MapPin, User as UserIcon } from "lucide-react";
+import { Plus, MapPin } from "lucide-react";
 import { JobStatus, AppStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { requireEmployer } from "@/lib/rbac";
@@ -8,6 +8,8 @@ import { buttonVariants } from "@/components/ui/button";
 import { StatusBadge } from "@/components/status-badge";
 import { mapAppStatusOut } from "@/lib/validators";
 import { EmployerCompanyChip } from "@/components/employer-sidebar";
+import { AnimatedCounter } from "@/components/animated-counter";
+import { AvatarCircle } from "@/components/avatar-circle";
 
 export const metadata = {
   title: "Employer dashboard",
@@ -112,12 +114,14 @@ export default async function EmployerDashboardPage() {
         {cards.map((c) => (
           <article
             key={c.label}
-            className="flex flex-col gap-2 rounded-lg border border-border bg-card p-6"
+            className="jb-card-hover flex flex-col gap-2 rounded-lg border border-border bg-card p-6"
           >
             <span className="text-caption text-muted-foreground">
               {c.label}
             </span>
-            <span className="text-h2 font-bold leading-none">{c.value}</span>
+            <span className="text-h2 font-bold leading-none">
+              <AnimatedCounter value={c.value} />
+            </span>
           </article>
         ))}
       </section>
@@ -166,7 +170,7 @@ export default async function EmployerDashboardPage() {
                   <div className="mt-2 flex flex-wrap items-center gap-3 text-small text-muted-foreground">
                     <span className="inline-flex items-center gap-1.5">
                       <span
-                        className="size-1.5 rounded-full bg-status-accepted-text"
+                        className="size-1.5 rounded-full bg-status-accepted-text jb-anim-pulse-dot"
                         aria-hidden="true"
                       />
                       Active
@@ -230,13 +234,11 @@ export default async function EmployerDashboardPage() {
                           href={`/employer/candidates/${a.id}`}
                           className="flex items-center gap-3 hover:underline"
                         >
-                          <span className="flex size-8 shrink-0 items-center justify-center rounded-full border border-border bg-muted">
-                            <UserIcon
-                              className="size-4 text-muted-foreground"
-                              strokeWidth={1.75}
-                              aria-hidden="true"
-                            />
-                          </span>
+                          <AvatarCircle
+                            name={a.user.name}
+                            seed={a.user.email}
+                            size="sm"
+                          />
                           <span className="font-medium">{a.user.name}</span>
                         </Link>
                       </td>

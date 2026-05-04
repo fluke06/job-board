@@ -1,11 +1,18 @@
 import Link from "next/link";
 import { ArrowRight, MapPin, DollarSign } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 const TYPE_LABEL: Record<string, string> = {
   "full-time": "Full-time",
   "part-time": "Part-time",
   remote: "Remote",
+};
+
+const TYPE_PILL: Record<string, string> = {
+  "full-time":
+    "bg-type-fulltime-bg text-type-fulltime-text border border-transparent",
+  "part-time":
+    "bg-type-parttime-bg text-type-parttime-text border border-transparent",
+  remote: "bg-primary text-primary-foreground border border-transparent",
 };
 
 export function JobCard({
@@ -21,9 +28,8 @@ export function JobCard({
     salaryRange?: string | null;
   };
 }) {
-  const isRemote = job.type === "remote";
   return (
-    <article className="group flex flex-col rounded-lg border border-border bg-card p-6 transition-shadow duration-200 hover:shadow-sm">
+    <article className="group jb-card-hover flex flex-col rounded-lg border border-border bg-card p-6">
       <div className="flex items-center justify-between gap-3">
         {job.companySlug ? (
           <Link
@@ -38,11 +44,7 @@ export function JobCard({
           </span>
         )}
         <span
-          className={`inline-flex items-center rounded-full px-2.5 py-1 text-caption ${
-            isRemote
-              ? "bg-primary text-primary-foreground"
-              : "border border-border text-foreground"
-          }`}
+          className={`inline-flex items-center rounded-full px-2.5 py-1 text-caption ${TYPE_PILL[job.type]}`}
         >
           {TYPE_LABEL[job.type]}
         </span>
@@ -78,7 +80,7 @@ export function JobCard({
         >
           View role
           <ArrowRight
-            className="size-4"
+            className="size-4 jb-arrow-nudge"
             strokeWidth={1.75}
             aria-hidden="true"
           />

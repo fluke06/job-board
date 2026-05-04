@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { requireUser } from "@/lib/rbac";
+import { AnimatedCounter } from "@/components/animated-counter";
 import {
   Table,
   TableBody,
@@ -129,7 +130,7 @@ export default async function DashboardPage() {
         {stats.map((s) => (
           <article
             key={s.label}
-            className="flex flex-col gap-4 rounded-lg border border-border bg-card p-6 transition-shadow hover:shadow-sm"
+            className="jb-card-hover flex flex-col gap-4 rounded-lg border border-border bg-card p-6"
           >
             <div className="flex items-center justify-between">
               <span className="text-small font-medium text-muted-foreground">
@@ -141,7 +142,9 @@ export default async function DashboardPage() {
                 aria-hidden="true"
               />
             </div>
-            <span className="text-h1 font-bold leading-none">{s.value}</span>
+            <span className="text-h1 font-bold leading-none">
+              <AnimatedCounter value={s.value} />
+            </span>
           </article>
         ))}
       </section>

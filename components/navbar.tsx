@@ -52,8 +52,17 @@ export async function Navbar() {
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto flex h-16 w-full max-w-7xl items-center justify-between gap-6 px-4 md:px-8">
-        <Link href="/" className="flex items-center gap-2">
-          <Briefcase className="size-5" aria-hidden="true" strokeWidth={1.75} />
+        <Link
+          href="/"
+          className="group flex items-center gap-2 transition-opacity hover:opacity-90"
+        >
+          <span className="flex size-7 items-center justify-center rounded-md bg-gradient-to-br from-brand to-brand-strong text-brand-foreground shadow-sm transition-transform group-hover:scale-105">
+            <Briefcase
+              className="size-4"
+              aria-hidden="true"
+              strokeWidth={2}
+            />
+          </span>
           <span className="text-body-lg font-bold tracking-tight">JobBoard</span>
         </Link>
 

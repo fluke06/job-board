@@ -1,12 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import {
-  Calendar,
-  ChevronRight,
-  Clock,
-  MapPin,
-  User as UserIcon,
-} from "lucide-react";
+import { Calendar, ChevronRight, Clock, MapPin } from "lucide-react";
+import { AvatarCircle } from "@/components/avatar-circle";
 import { prisma } from "@/lib/prisma";
 import { AppStatus, JobStatus } from "@prisma/client";
 import { requireCompanyMember } from "@/lib/rbac";
@@ -268,13 +263,12 @@ export default async function CandidatePipelinePage({
               className="flex flex-col gap-6 rounded-xl border border-border bg-card p-5 transition-shadow hover:shadow-sm md:flex-row md:items-start md:justify-between md:p-6"
             >
               <div className="flex flex-grow items-start gap-4">
-                <div className="flex size-12 shrink-0 items-center justify-center rounded-full border border-border bg-muted">
-                  <UserIcon
-                    className="size-5 text-muted-foreground"
-                    strokeWidth={1.75}
-                    aria-hidden="true"
-                  />
-                </div>
+                <AvatarCircle
+                  name={a.user.name}
+                  seed={a.user.email}
+                  size="lg"
+                  className="shrink-0"
+                />
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
                     <Link
