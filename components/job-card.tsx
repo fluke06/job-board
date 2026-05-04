@@ -43,7 +43,7 @@ export function JobCard({
   const isHot = (job.applicationCount ?? 0) >= 3;
 
   return (
-    <article className="group relative flex flex-col rounded-2xl border-2 border-foreground bg-card p-6 shadow-[3px_3px_0_var(--foreground)] transition-transform hover:-translate-x-px hover:-translate-y-px hover:shadow-[5px_5px_0_var(--foreground)]">
+    <article className="group relative flex h-full flex-col rounded-2xl border-2 border-foreground bg-card p-6 shadow-[3px_3px_0_var(--foreground)] transition-[transform,box-shadow] duration-150 hover:-translate-x-px hover:-translate-y-px hover:shadow-[5px_5px_0_var(--foreground)]">
       {isNew || isHot ? (
         <div className="pointer-events-none absolute -right-2 -top-2 flex flex-col gap-1.5">
           {isNew ? (

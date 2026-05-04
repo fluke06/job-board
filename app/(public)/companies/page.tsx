@@ -99,44 +99,38 @@ export default async function CompaniesPage({
             <Link
               key={c.id}
               href={`/companies/${c.slug}`}
-              className="group flex flex-col rounded-xl border border-border bg-card p-6 transition-shadow duration-200 hover:shadow-sm"
+              className="group flex h-full flex-col rounded-2xl border-2 border-foreground bg-card p-6 shadow-[3px_3px_0_var(--foreground)] transition-[transform,box-shadow] duration-150 hover:-translate-x-px hover:-translate-y-px hover:shadow-[5px_5px_0_var(--foreground)]"
             >
-              <div className="mb-4 flex items-center gap-4">
-                <div className="flex size-12 shrink-0 items-center justify-center rounded-lg border border-border bg-muted">
+              <div className="mb-4 flex items-start gap-4">
+                <div className="flex size-12 shrink-0 items-center justify-center rounded-lg border-2 border-foreground bg-gradient-to-br from-brand-soft to-card">
                   <Building2
-                    className="size-5 text-muted-foreground"
-                    strokeWidth={1.75}
+                    className="size-5 text-foreground"
+                    strokeWidth={2}
                     aria-hidden="true"
                   />
                 </div>
-                <div className="min-w-0">
-                  <h3 className="text-h4 font-semibold leading-tight group-hover:underline">
+                <div className="min-h-12 min-w-0 flex-1">
+                  <h3 className="text-h4 font-bold leading-tight group-hover:underline">
                     {c.name}
                   </h3>
-                  {c.industry ? (
-                    <span className="text-caption text-muted-foreground">
-                      {c.industry}
-                    </span>
-                  ) : null}
+                  <span className="block text-caption text-muted-foreground">
+                    {c.industry ?? " "}
+                  </span>
                 </div>
               </div>
-              {c.description ? (
-                <p className="mb-6 line-clamp-2 flex-grow text-small text-muted-foreground">
-                  {c.description}
-                </p>
-              ) : (
-                <div className="mb-6 flex-grow" />
-              )}
+              <p className="mb-6 line-clamp-2 min-h-[2.6em] flex-grow text-small text-muted-foreground">
+                {c.description ?? " "}
+              </p>
               <div className="mt-auto flex items-center justify-between">
-                <span className="rounded-full border border-border bg-muted px-2.5 py-1 text-caption text-muted-foreground">
+                <span className="rounded-full border-[1.5px] border-foreground/30 bg-muted px-2.5 py-1 text-caption text-muted-foreground">
                   {c._count.jobs} open{" "}
                   {c._count.jobs === 1 ? "role" : "roles"}
                 </span>
-                <span className="inline-flex items-center gap-1 text-small font-medium text-foreground group-hover:underline">
+                <span className="inline-flex items-center gap-1 text-small font-semibold text-foreground group-hover:underline">
                   View
                   <ArrowRight
-                    className="size-4 transition-transform group-hover:translate-x-0.5"
-                    strokeWidth={1.75}
+                    className="size-4 jb-arrow-nudge"
+                    strokeWidth={2}
                     aria-hidden="true"
                   />
                 </span>

@@ -215,7 +215,7 @@ export default async function HomePage() {
             <div className="grid gap-4 md:grid-cols-12">
               <Link
                 href={`/jobs/${featured.id}`}
-                className="group jb-card-hover relative flex flex-col justify-between gap-6 overflow-hidden rounded-2xl border-2 border-foreground bg-gradient-to-br from-brand-soft via-card to-card p-8 shadow-[4px_4px_0_var(--foreground)] md:col-span-7 md:row-span-2 md:p-10"
+                className="group relative flex flex-col justify-between gap-6 overflow-hidden rounded-2xl border-2 border-foreground bg-gradient-to-br from-brand-soft via-card to-card p-8 shadow-[4px_4px_0_var(--foreground)] transition-[transform,box-shadow] duration-150 hover:-translate-x-px hover:-translate-y-px hover:shadow-[6px_6px_0_var(--foreground)] md:col-span-7 md:row-span-2 md:p-10"
               >
                 <div
                   aria-hidden="true"
@@ -285,7 +285,7 @@ export default async function HomePage() {
                   <Link
                     key={j.id}
                     href={`/jobs/${j.id}`}
-                    className={`group jb-card-hover relative flex flex-col justify-between gap-3 rounded-xl border border-border bg-card p-5 ${span} md:col-start-auto`}
+                    className={`group relative flex h-full flex-col justify-between gap-3 rounded-xl border-2 border-foreground bg-card p-5 shadow-[3px_3px_0_var(--foreground)] transition-[transform,box-shadow] duration-150 hover:-translate-x-px hover:-translate-y-px hover:shadow-[5px_5px_0_var(--foreground)] ${span} md:col-start-auto`}
                   >
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-caption text-muted-foreground">
@@ -365,7 +365,7 @@ export default async function HomePage() {
               <RevealOnScroll key={g.location} delay={i * 60}>
                 <Link
                   href={`/jobs?location=${encodeURIComponent(g.location)}`}
-                  className="jb-card-hover group flex h-full flex-col gap-2 rounded-xl border-2 border-foreground bg-card p-5 shadow-[3px_3px_0_var(--foreground)] transition-transform hover:-translate-x-px hover:-translate-y-px hover:shadow-[4px_4px_0_var(--foreground)]"
+                  className="group flex h-full flex-col gap-2 rounded-xl border-2 border-foreground bg-card p-5 shadow-[3px_3px_0_var(--foreground)] transition-[transform,box-shadow] duration-150 hover:-translate-x-px hover:-translate-y-px hover:shadow-[5px_5px_0_var(--foreground)]"
                 >
                   <MapPin
                     className="size-5 text-brand"
@@ -404,7 +404,7 @@ export default async function HomePage() {
         <ol className="grid gap-6 md:grid-cols-3">
           {HOW_IT_WORKS.map((step, i) => (
             <RevealOnScroll key={step.title} delay={i * 100}>
-              <li className="jb-card-hover relative flex h-full flex-col gap-4 overflow-hidden rounded-2xl border-2 border-foreground bg-card p-6 shadow-[3px_3px_0_var(--foreground)]">
+              <li className="relative flex h-full flex-col gap-4 overflow-hidden rounded-2xl border-2 border-foreground bg-card p-6 shadow-[3px_3px_0_var(--foreground)] transition-[transform,box-shadow] duration-150 hover:-translate-x-px hover:-translate-y-px hover:shadow-[5px_5px_0_var(--foreground)]">
                 <span
                   className="absolute right-4 top-4 text-[80px] font-black leading-none text-foreground/5"
                   aria-hidden="true"

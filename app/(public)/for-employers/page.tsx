@@ -130,10 +130,10 @@ export default function ForEmployersPage() {
           {FEATURES.map((f, i) => (
             <div
               key={f.title}
-              className={`jb-card-hover rounded-2xl border-2 border-foreground bg-card p-6 ${
+              className={`rounded-2xl border-2 border-foreground bg-card p-6 transition-[transform,box-shadow] duration-150 hover:-translate-x-px hover:-translate-y-px ${
                 i % 2 === 0
-                  ? "shadow-[3px_3px_0_var(--foreground)]"
-                  : "shadow-[3px_3px_0_var(--brand)]"
+                  ? "shadow-[3px_3px_0_var(--foreground)] hover:shadow-[5px_5px_0_var(--foreground)]"
+                  : "shadow-[3px_3px_0_var(--brand)] hover:shadow-[5px_5px_0_var(--brand)]"
               }`}
             >
               <div className="flex size-10 items-center justify-center rounded-md bg-gradient-to-br from-brand to-brand-strong text-brand-foreground">
@@ -172,10 +172,10 @@ export default function ForEmployersPage() {
           {TIERS.map((t) => (
             <div
               key={t.name}
-              className={`jb-card-hover relative flex flex-col rounded-2xl border-2 bg-card p-6 ${
+              className={`relative flex flex-col rounded-2xl border-2 border-foreground bg-card p-6 transition-[transform,box-shadow] duration-150 hover:-translate-x-px hover:-translate-y-px ${
                 t.highlighted
-                  ? "border-foreground shadow-[6px_6px_0_var(--foreground)]"
-                  : "border-foreground shadow-[3px_3px_0_var(--foreground)]"
+                  ? "shadow-[6px_6px_0_var(--foreground)] hover:shadow-[8px_8px_0_var(--foreground)]"
+                  : "shadow-[3px_3px_0_var(--foreground)] hover:shadow-[5px_5px_0_var(--foreground)]"
               }`}
             >
               <div className="flex items-baseline justify-between">
