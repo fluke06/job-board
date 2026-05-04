@@ -6,6 +6,8 @@ import { JobCard } from "@/components/job-card";
 import { JobFilters } from "@/components/job-filters";
 import { listJobsQuery, mapJobType, mapJobTypeOut } from "@/lib/validators";
 import { buttonVariants } from "@/components/ui/button";
+import { Squiggle } from "@/components/squiggle";
+import { AnimatedCounter } from "@/components/animated-counter";
 import { cn } from "@/lib/utils";
 
 export const revalidate = 60;
@@ -89,12 +91,27 @@ export default async function JobsPage({
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-12 md:px-8 md:py-16">
-      <header className="border-b border-border pb-8">
-        <h1>Browse jobs</h1>
-        <p className="mt-2 text-body-lg text-muted-foreground">
-          {total === 0
-            ? "No open positions match your filters."
-            : `Showing ${start}–${end} of ${total} open ${total === 1 ? "position" : "positions"}.`}
+      <header className="border-b-2 border-foreground pb-8">
+        <span className="text-caption text-brand-strong">Open roles</span>
+        <h1 className="mt-2 jb-display !text-[clamp(40px,7vw,72px)]">
+          Browse{" "}
+          <span className="relative inline-block">
+            <span className="bg-gradient-to-r from-brand-strong via-brand to-fuchsia-500 bg-clip-text text-transparent">
+              every
+            </span>
+            <Squiggle className="absolute left-0 right-0 -bottom-1 h-2 w-full text-brand" />
+          </span>{" "}
+          role.
+        </h1>
+        <p className="mt-4 text-body-lg text-muted-foreground">
+          {total === 0 ? (
+            "No open positions match your filters."
+          ) : (
+            <>
+              Showing {start}–{end} of <AnimatedCounter value={total} /> open{" "}
+              {total === 1 ? "position" : "positions"}.
+            </>
+          )}
         </p>
       </header>
 

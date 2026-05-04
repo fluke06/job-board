@@ -93,13 +93,15 @@ export default async function EmployerDashboardPage() {
       <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div className="space-y-3">
           {company ? <EmployerCompanyChip name={company.name} /> : null}
-          <h1>Dashboard</h1>
+          <h1 className="jb-display !text-[clamp(36px,5vw,56px)]">
+            Dashboard.
+          </h1>
         </div>
         <Link
           href="/employer/jobs/new"
-          className={buttonVariants({ size: "default" })}
+          className={`${buttonVariants({ size: "default" })} shadow-[3px_3px_0_var(--foreground)] transition-transform hover:-translate-x-px hover:-translate-y-px hover:shadow-[4px_4px_0_var(--foreground)]`}
         >
-          <Plus className="size-4" strokeWidth={1.75} aria-hidden="true" />
+          <Plus className="size-4" strokeWidth={2} aria-hidden="true" />
           Post a job
         </Link>
       </header>

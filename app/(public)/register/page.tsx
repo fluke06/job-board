@@ -9,11 +9,11 @@ export const metadata = {
 export default function RegisterPage() {
   return (
     <div className="mx-auto flex w-full max-w-md flex-col px-4 py-16 md:py-24">
-      <div className="rounded-xl border border-border bg-card p-8">
+      <div className="rounded-2xl border-2 border-foreground bg-card p-8 shadow-[4px_4px_0_var(--foreground)]">
         <div className="mb-6 text-center">
-          <h1 className="text-h3 font-semibold">Create an account</h1>
+          <h1 className="text-h2 font-bold">Join the board.</h1>
           <p className="mt-2 text-small text-muted-foreground">
-            Join JobBoard to apply for roles or post jobs in seconds.
+            Apply for roles or post jobs in seconds.
           </p>
         </div>
         <Suspense fallback={null}>

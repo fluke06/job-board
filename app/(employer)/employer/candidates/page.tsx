@@ -130,10 +130,11 @@ export default async function TalentPoolPage({
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-12 md:px-8 md:py-16 space-y-8">
-      <header className="space-y-3">
-        <h1 className="inline-flex items-center gap-3">
-          <Users className="size-7" strokeWidth={1.75} aria-hidden="true" />
-          Talent Pool
+      <header className="space-y-3 border-b-2 border-foreground pb-6">
+        <span className="text-caption text-brand-strong">Your candidates</span>
+        <h1 className="jb-display !text-[clamp(36px,5vw,56px)] inline-flex items-center gap-3">
+          <Users className="size-9" strokeWidth={2.5} aria-hidden="true" />
+          Talent Pool.
         </h1>
         <p className="text-body-lg text-muted-foreground">
           Every candidate who has applied across your jobs.

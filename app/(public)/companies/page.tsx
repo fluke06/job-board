@@ -4,6 +4,8 @@ import { ArrowRight, Building2 } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import { JobStatus, Prisma } from "@prisma/client";
 import { CompaniesSearch } from "@/components/companies-search";
+import { Squiggle } from "@/components/squiggle";
+import { AnimatedCounter } from "@/components/animated-counter";
 
 export const revalidate = 60;
 
@@ -53,9 +55,23 @@ export default async function CompaniesPage({
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-12 md:px-8 md:py-16 space-y-12">
       <header className="space-y-4">
-        <h1>Companies</h1>
+        <span className="text-caption text-brand-strong">The roster</span>
+        <h1 className="jb-display !text-[clamp(40px,7vw,72px)]">
+          The{" "}
+          <span className="relative inline-block">
+            <span className="bg-gradient-to-r from-brand-strong via-brand to-fuchsia-500 bg-clip-text text-transparent">
+              companies
+            </span>
+            <Squiggle className="absolute left-0 right-0 -bottom-1 h-2 w-full text-brand" />
+          </span>{" "}
+          hiring.
+        </h1>
         <p className="max-w-2xl text-body-lg text-muted-foreground">
-          Browse companies hiring on JobBoard.
+          <AnimatedCounter value={companies.length} /> teams ·{" "}
+          <AnimatedCounter
+            value={companies.reduce((acc, c) => acc + c._count.jobs, 0)}
+          />{" "}
+          open roles. No recruiter spam.
         </p>
       </header>
 

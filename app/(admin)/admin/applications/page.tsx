@@ -39,10 +39,14 @@ export default async function AdminApplicationsPage() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-12 md:px-8 md:py-16 space-y-8">
-      <header className="border-b border-border pb-8">
-        <h1>Applications</h1>
-        <p className="mt-2 text-body-lg text-muted-foreground">
-          {items.length} {items.length === 1 ? "application" : "applications"}
+      <header className="border-b-2 border-foreground pb-8 space-y-3">
+        <span className="text-caption text-brand-strong">Platform admin</span>
+        <h1 className="jb-display !text-[clamp(36px,5vw,56px)]">
+          Applications.
+        </h1>
+        <p className="text-body-lg text-muted-foreground">
+          {items.length} {items.length === 1 ? "application" : "applications"}{" "}
+          across every company.
         </p>
       </header>
 

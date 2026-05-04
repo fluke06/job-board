@@ -105,15 +105,12 @@ export default async function DashboardPage() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-12 md:px-8 md:py-16 space-y-12">
-      <header className="space-y-2">
-        <h1>
-          Your applications
-          {user?.name ? (
-            <span className="text-muted-foreground">
-              {" "}
-              · {user.name.split(" ")[0]}
-            </span>
-          ) : null}
+      <header className="space-y-3 border-b-2 border-foreground pb-6">
+        <span className="text-caption text-brand-strong">
+          {user?.name ? `Hey, ${user.name.split(" ")[0]}` : "Your dashboard"}
+        </span>
+        <h1 className="jb-display !text-[clamp(36px,5vw,56px)]">
+          Your applications.
         </h1>
         <p className="text-body-lg text-muted-foreground">
           Track and manage your recent job applications.

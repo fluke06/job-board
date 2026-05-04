@@ -57,10 +57,13 @@ export default async function ApplicationsPage() {
           <ChevronRight className="size-4" strokeWidth={1.75} aria-hidden="true" />
           <span className="text-foreground">Applications</span>
         </nav>
-        <header>
-          <h1>My applications</h1>
+        <header className="space-y-2">
+          <span className="text-caption text-brand-strong">Applications</span>
+          <h1 className="jb-display !text-[clamp(36px,5vw,56px)]">
+            All your applications.
+          </h1>
           <p className="mt-2 text-body-lg text-muted-foreground">
-            All roles you&apos;ve applied to.
+            Every role you&apos;ve applied to, in one place.
           </p>
         </header>
       </div>

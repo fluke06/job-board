@@ -42,14 +42,19 @@ export default async function AdminJobsPage() {
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-12 md:px-8 md:py-16 space-y-8">
-      <header className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-8">
-        <div className="space-y-2">
-          <h1>Jobs</h1>
+      <header className="flex flex-wrap items-end justify-between gap-4 border-b-2 border-foreground pb-8">
+        <div className="space-y-3">
+          <span className="text-caption text-brand-strong">Platform jobs</span>
+          <h1 className="jb-display !text-[clamp(36px,5vw,56px)]">All jobs.</h1>
           <p className="text-body-lg text-muted-foreground">
-            {jobs.length} {jobs.length === 1 ? "job" : "jobs"}
+            {jobs.length} {jobs.length === 1 ? "posting" : "postings"} across
+            every company.
           </p>
         </div>
-        <Link href="/admin/jobs/new" className={buttonVariants()}>
+        <Link
+          href="/admin/jobs/new"
+          className={`${buttonVariants()} shadow-[3px_3px_0_var(--foreground)] transition-transform hover:-translate-x-px hover:-translate-y-px`}
+        >
           New job
         </Link>
       </header>

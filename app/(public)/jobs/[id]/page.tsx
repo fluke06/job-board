@@ -189,8 +189,8 @@ export default async function JobDetailPage({
       </Link>
 
       {canApply ? (
-        <section className="flex flex-wrap items-center justify-between gap-4 rounded-xl border border-border bg-card p-5 shadow-sm">
-          <h2 className="text-h3 font-semibold">Ready to apply?</h2>
+        <section className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border-2 border-foreground bg-[hsl(74_90%_60%)] p-5 shadow-[4px_4px_0_var(--foreground)] md:p-6">
+          <h2 className="text-h3 font-bold">Ready to apply?</h2>
           <ApplyDialog jobId={job.id} />
         </section>
       ) : null}

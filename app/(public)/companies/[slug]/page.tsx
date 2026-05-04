@@ -57,12 +57,14 @@ export default async function CompanyPage({
         </div>
         <div className="flex-1 space-y-3">
           <div>
-            <h1>{company.name}</h1>
             {company.industry ? (
-              <p className="mt-1 text-body-lg text-muted-foreground">
+              <span className="text-caption text-brand-strong">
                 {company.industry}
-              </p>
+              </span>
             ) : null}
+            <h1 className="mt-2 jb-display !text-[clamp(36px,5vw,56px)]">
+              {company.name}.
+            </h1>
           </div>
           <div className="flex flex-wrap gap-4 text-small text-muted-foreground">
             {company.size ? (
