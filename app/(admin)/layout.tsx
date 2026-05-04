@@ -4,6 +4,7 @@ import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { logEvent } from "@/lib/logger";
 import { SiteShell } from "@/components/site-shell";
+import { AdminSubnav } from "@/components/admin-subnav";
 
 export default async function AdminLayout({
   children,
@@ -22,5 +23,10 @@ export default async function AdminLayout({
     redirect("/");
   }
 
-  return <SiteShell>{children}</SiteShell>;
+  return (
+    <SiteShell>
+      <AdminSubnav />
+      {children}
+    </SiteShell>
+  );
 }
