@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Building2, ChevronRight } from "lucide-react";
+import { Squiggle } from "@/components/squiggle";
 import { Role, JobStatus, JobType } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
@@ -195,27 +196,32 @@ export default async function JobDetailPage({
         </section>
       ) : null}
 
-      <header className="space-y-6 border-b border-border pb-8">
+      <header className="space-y-6 border-b-2 border-foreground pb-8">
         <div className="flex items-start gap-4">
           <Link
             href={`/companies/${job.company.slug}`}
             aria-label={`${job.company.name} profile`}
-            className="flex size-12 shrink-0 items-center justify-center rounded-md border border-border bg-muted"
+            className="flex size-14 shrink-0 items-center justify-center rounded-lg border-2 border-foreground bg-card shadow-[3px_3px_0_var(--foreground)] transition-transform hover:-translate-x-px hover:-translate-y-px"
           >
             <Building2
-              className="size-5 text-muted-foreground"
-              strokeWidth={1.75}
+              className="size-6 text-foreground"
+              strokeWidth={2}
               aria-hidden="true"
             />
           </Link>
           <div className="min-w-0 space-y-2">
             <Link
               href={`/companies/${job.company.slug}`}
-              className="text-small text-muted-foreground hover:text-foreground"
+              className="relative inline-block text-small font-medium text-muted-foreground hover:text-foreground"
             >
-              {job.company.name}
+              <span className="relative">
+                {job.company.name}
+                <Squiggle className="absolute left-0 right-0 -bottom-1 h-1.5 w-full text-brand opacity-60" />
+              </span>
             </Link>
-            <h1 className="leading-tight">{job.title}</h1>
+            <h1 className="jb-display !text-[clamp(36px,5vw,56px)] leading-[1.05]">
+              {job.title}
+            </h1>
             <p className="text-small text-muted-foreground">
               {relativePosted(job.createdAt)}
             </p>
@@ -226,22 +232,22 @@ export default async function JobDetailPage({
           <span
             className={`inline-flex items-center rounded-full px-2.5 py-1 text-caption ${
               apiType === "remote"
-                ? "bg-primary text-primary-foreground"
-                : "border border-border text-foreground"
+                ? "bg-foreground text-background border-[1.5px] border-foreground"
+                : "border-[1.5px] border-foreground text-foreground"
             }`}
           >
             {TYPE_LABEL[apiType]}
           </span>
-          <span className="inline-flex items-center rounded-full border border-border px-2.5 py-1 text-caption">
+          <span className="inline-flex items-center rounded-full border-[1.5px] border-foreground px-2.5 py-1 text-caption">
             {job.location}
           </span>
           {job.salaryRange ? (
-            <span className="inline-flex items-center rounded-full border border-border px-2.5 py-1 text-caption">
+            <span className="inline-flex items-center rounded-full border-[1.5px] border-foreground bg-[hsl(74_90%_60%)] px-2.5 py-1 text-caption">
               {job.salaryRange}
             </span>
           ) : null}
           {job.status === JobStatus.CLOSED ? (
-            <span className="inline-flex items-center rounded-full bg-status-pending-bg px-2.5 py-1 text-caption text-status-pending-text">
+            <span className="inline-flex items-center rounded-full bg-status-pending-bg px-2.5 py-1 text-caption text-status-pending-text border-[1.5px] border-status-pending-text/30">
               Closed
             </span>
           ) : null}
@@ -251,7 +257,7 @@ export default async function JobDetailPage({
           {!session ? (
             <Link
               href={`/login?next=/jobs/${job.id}`}
-              className={buttonVariants({ size: "default" })}
+              className={`${buttonVariants({ size: "default" })} shadow-[3px_3px_0_var(--foreground)] transition-transform hover:-translate-x-px hover:-translate-y-px`}
             >
               Sign in to apply
             </Link>
@@ -259,7 +265,7 @@ export default async function JobDetailPage({
             <>
               <Link
                 href={`/admin/jobs/${job.id}/edit`}
-                className={buttonVariants({ variant: "outline" })}
+                className={`${buttonVariants({ variant: "outline" })} border-2 border-foreground shadow-[2px_2px_0_var(--foreground)]`}
               >
                 Edit
               </Link>
@@ -284,13 +290,19 @@ export default async function JobDetailPage({
 
       <div className="space-y-10">
         <section className="space-y-3">
-          <h2 className="text-h4 font-semibold">About the role</h2>
+          <span className="text-caption text-brand-strong">About the role</span>
+          <h2 className="jb-display !text-[clamp(28px,3vw,40px)]">
+            What you&apos;ll do.
+          </h2>
           <div className="space-y-4 whitespace-pre-line text-body text-foreground/80">
             <p>{job.description}</p>
           </div>
         </section>
         <section className="space-y-3">
-          <h2 className="text-h4 font-semibold">Requirements</h2>
+          <span className="text-caption text-brand-strong">Requirements</span>
+          <h2 className="jb-display !text-[clamp(28px,3vw,40px)]">
+            What you bring.
+          </h2>
           <div className="space-y-4 whitespace-pre-line text-body text-foreground/80">
             <p>{job.requirements}</p>
           </div>
