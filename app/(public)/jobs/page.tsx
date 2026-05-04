@@ -83,7 +83,7 @@ export default async function JobsPage({
         ? { applications: { _count: "desc" } }
         : { createdAt: "desc" };
 
-  const [items, total, allCompanies] = await Promise.all([
+  const [items, total] = await Promise.all([
     prisma.job.findMany({
       where,
       orderBy,
@@ -95,10 +95,6 @@ export default async function JobsPage({
       },
     }),
     prisma.job.count({ where }),
-    prisma.company.findMany({
-      orderBy: { name: "asc" },
-      select: { slug: true, name: true },
-    }),
   ]);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -144,7 +140,7 @@ export default async function JobsPage({
 
       <div className="mt-8 grid gap-8 md:grid-cols-[280px_1fr]">
         <aside>
-          <JobFilters companies={allCompanies} />
+          <JobFilters />
         </aside>
         <section>
           {items.length === 0 ? (

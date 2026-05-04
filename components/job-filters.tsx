@@ -33,20 +33,13 @@ const SORT = [
   { value: "popular", label: "Most applied" },
 ];
 
-export function JobFilters({
-  companies = [],
-}: {
-  companies?: Array<{ slug: string; name: string }>;
-}) {
+export function JobFilters() {
   const router = useRouter();
   const params = useSearchParams();
 
   const [q, setQ] = useState(params.get("q") ?? "");
   const [type, setType] = useState(params.get("type") ?? "any");
   const [location, setLocation] = useState(params.get("location") ?? "");
-  const [companySlug, setCompanySlug] = useState(
-    params.get("companySlug") ?? "any",
-  );
   const [posted, setPosted] = useState(params.get("posted") ?? "any");
   const [sort, setSort] = useState(params.get("sort") ?? "newest");
 
@@ -56,8 +49,6 @@ export function JobFilters({
     if (q.trim()) next.set("q", q.trim());
     if (type && type !== "any") next.set("type", type);
     if (location.trim()) next.set("location", location.trim());
-    if (companySlug && companySlug !== "any")
-      next.set("companySlug", companySlug);
     if (posted && posted !== "any") next.set("posted", posted);
     if (sort && sort !== "newest") next.set("sort", sort);
     router.push(`/jobs${next.toString() ? `?${next}` : ""}`);
@@ -67,7 +58,6 @@ export function JobFilters({
     setQ("");
     setType("any");
     setLocation("");
-    setCompanySlug("any");
     setPosted("any");
     setSort("newest");
     router.push("/jobs");
@@ -78,7 +68,6 @@ export function JobFilters({
       q.trim(),
       type !== "any" ? type : "",
       location.trim(),
-      companySlug !== "any" ? companySlug : "",
       posted !== "any" ? posted : "",
       sort !== "newest" ? sort : "",
     ].filter(Boolean).length;
@@ -132,27 +121,6 @@ export function JobFilters({
           placeholder="e.g. Manila, Remote"
         />
       </div>
-      {companies.length > 0 ? (
-        <div className="space-y-1.5">
-          <Label htmlFor="filter-company">Company</Label>
-          <Select
-            value={companySlug}
-            onValueChange={(v) => setCompanySlug(v ?? "any")}
-          >
-            <SelectTrigger id="filter-company">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="any">Any company</SelectItem>
-              {companies.map((c) => (
-                <SelectItem key={c.slug} value={c.slug}>
-                  {c.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      ) : null}
       <div className="space-y-1.5">
         <Label htmlFor="filter-posted">Posted</Label>
         <Select value={posted} onValueChange={(v) => setPosted(v ?? "any")}>
