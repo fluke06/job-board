@@ -230,7 +230,7 @@ export default async function JobDetailPage({
 
         <div className="flex flex-wrap items-center gap-2">
           <span
-            className={`inline-flex items-center rounded-full px-2.5 py-1 text-caption ${
+            className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider ${
               apiType === "remote"
                 ? "bg-foreground text-background border-[1.5px] border-foreground"
                 : "border-[1.5px] border-foreground text-foreground"
@@ -238,16 +238,16 @@ export default async function JobDetailPage({
           >
             {TYPE_LABEL[apiType]}
           </span>
-          <span className="inline-flex items-center rounded-full border-[1.5px] border-foreground px-2.5 py-1 text-caption">
+          <span className="inline-flex items-center rounded-full border-[1.5px] border-foreground px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
             {job.location}
           </span>
           {job.salaryRange ? (
-            <span className="inline-flex items-center rounded-full border-[1.5px] border-foreground bg-[hsl(74_90%_60%)] px-2.5 py-1 text-caption">
+            <span className="inline-flex items-center rounded-full border-[1.5px] border-foreground bg-[hsl(74_90%_60%)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider">
               {job.salaryRange}
             </span>
           ) : null}
           {job.status === JobStatus.CLOSED ? (
-            <span className="inline-flex items-center rounded-full bg-status-pending-bg px-2.5 py-1 text-caption text-status-pending-text border-[1.5px] border-status-pending-text/30">
+            <span className="inline-flex items-center rounded-full bg-status-pending-bg px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-status-pending-text border-[1.5px] border-status-pending-text/30">
               Closed
             </span>
           ) : null}
