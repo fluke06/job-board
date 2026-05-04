@@ -45,10 +45,24 @@ export default async function JobsPage({
     : { page: 1, pageSize: 10 as const };
 
   const where: Prisma.JobWhereInput = { status: JobStatus.OPEN };
+  let sort: "newest" | "oldest" | "popular" = "newest";
   if (parsed.success) {
     if (parsed.data.type) where.type = mapJobType(parsed.data.type);
     if (parsed.data.location)
       where.location = { contains: parsed.data.location };
+    if (parsed.data.companySlug)
+      where.company = { slug: parsed.data.companySlug };
+    if (parsed.data.posted) {
+      const days =
+        parsed.data.posted === "24h"
+          ? 1
+          : parsed.data.posted === "7d"
+            ? 7
+            : 30;
+      where.createdAt = {
+        gte: new Date(Date.now() - days * 24 * 60 * 60 * 1000),
+      };
+    }
     if (parsed.data.q) {
       where.OR = [
         { title: { contains: parsed.data.q } },
@@ -56,15 +70,23 @@ export default async function JobsPage({
         { description: { contains: parsed.data.q } },
       ];
     }
+    sort = parsed.data.sort;
   }
 
   const page = params.page;
   const pageSize = params.pageSize;
 
-  const [items, total] = await Promise.all([
+  const orderBy: Prisma.JobOrderByWithRelationInput =
+    sort === "oldest"
+      ? { createdAt: "asc" }
+      : sort === "popular"
+        ? { applications: { _count: "desc" } }
+        : { createdAt: "desc" };
+
+  const [items, total, allCompanies] = await Promise.all([
     prisma.job.findMany({
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy,
       skip: (page - 1) * pageSize,
       take: pageSize,
       include: {
@@ -73,6 +95,10 @@ export default async function JobsPage({
       },
     }),
     prisma.job.count({ where }),
+    prisma.company.findMany({
+      orderBy: { name: "asc" },
+      select: { slug: true, name: true },
+    }),
   ]);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
@@ -118,7 +144,7 @@ export default async function JobsPage({
 
       <div className="mt-8 grid gap-8 md:grid-cols-[280px_1fr]">
         <aside>
-          <JobFilters />
+          <JobFilters companies={allCompanies} />
         </aside>
         <section>
           {items.length === 0 ? (

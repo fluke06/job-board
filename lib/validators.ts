@@ -71,6 +71,9 @@ export const listJobsQuery = z.object({
   type: apiJobType.optional(),
   location: z.string().trim().max(80).optional(),
   status: z.enum(["open", "closed", "all"]).optional(),
+  companySlug: z.string().trim().max(60).optional(),
+  posted: z.enum(["24h", "7d", "30d"]).optional(),
+  sort: z.enum(["newest", "oldest", "popular"]).default("newest"),
   page: z.coerce.number().int().min(1).default(1),
   pageSize: z.coerce.number().int().min(1).max(50).default(10),
 });

@@ -20,7 +20,8 @@ export async function GET(req: NextRequest) {
       { status: 400 },
     );
   }
-  const { q, type, location, page, pageSize } = parsed.data;
+  const { q, type, location, companySlug, posted, sort, page, pageSize } =
+    parsed.data;
   let { status } = parsed.data;
 
   const session = await getSession();
@@ -34,6 +35,13 @@ export async function GET(req: NextRequest) {
   else if (status === "closed") where.status = JobStatus.CLOSED;
   if (type) where.type = mapJobType(type);
   if (location) where.location = { contains: location };
+  if (companySlug) where.company = { slug: companySlug };
+  if (posted) {
+    const days = posted === "24h" ? 1 : posted === "7d" ? 7 : 30;
+    where.createdAt = {
+      gte: new Date(Date.now() - days * 24 * 60 * 60 * 1000),
+    };
+  }
   if (q) {
     where.OR = [
       { title: { contains: q } },
@@ -42,10 +50,17 @@ export async function GET(req: NextRequest) {
     ];
   }
 
+  const orderBy: Prisma.JobOrderByWithRelationInput =
+    sort === "oldest"
+      ? { createdAt: "asc" }
+      : sort === "popular"
+        ? { applications: { _count: "desc" } }
+        : { createdAt: "desc" };
+
   const [items, total] = await Promise.all([
     prisma.job.findMany({
       where,
-      orderBy: { createdAt: "desc" },
+      orderBy,
       skip: (page - 1) * pageSize,
       take: pageSize,
       include: {
