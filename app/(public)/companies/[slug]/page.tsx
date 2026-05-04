@@ -40,6 +40,7 @@ export default async function CompanyPage({
       jobs: {
         where: { status: JobStatus.OPEN },
         orderBy: { createdAt: "desc" },
+        include: { _count: { select: { applications: true } } },
       },
     },
   });
@@ -129,7 +130,7 @@ export default async function CompanyPage({
             </p>
           </div>
         ) : (
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-6 sm:grid-cols-2">
             {company.jobs.map((job) => (
               <JobCard
                 key={job.id}
@@ -141,6 +142,8 @@ export default async function CompanyPage({
                   location: job.location,
                   type: mapJobTypeOut(job.type),
                   salaryRange: job.salaryRange,
+                  createdAt: job.createdAt,
+                  applicationCount: job._count.applications,
                 }}
               />
             ))}

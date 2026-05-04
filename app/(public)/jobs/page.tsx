@@ -69,6 +69,7 @@ export default async function JobsPage({
       take: pageSize,
       include: {
         company: { select: { id: true, slug: true, name: true } },
+        _count: { select: { applications: true } },
       },
     }),
     prisma.job.count({ where }),
@@ -130,7 +131,7 @@ export default async function JobsPage({
               </p>
             </div>
           ) : (
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-6 md:grid-cols-2">
               {items.map((job) => (
                 <JobCard
                   key={job.id}
@@ -142,6 +143,8 @@ export default async function JobsPage({
                     location: job.location,
                     type: mapJobTypeOut(job.type),
                     salaryRange: job.salaryRange,
+                    createdAt: job.createdAt,
+                    applicationCount: job._count.applications,
                   }}
                 />
               ))}

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowRight, MapPin, DollarSign } from "lucide-react";
+import { ArrowRight, MapPin, DollarSign, Sparkles, Flame } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const TYPE_LABEL: Record<string, string> = {
   "full-time": "Full-time",
@@ -9,11 +10,13 @@ const TYPE_LABEL: Record<string, string> = {
 
 const TYPE_PILL: Record<string, string> = {
   "full-time":
-    "bg-type-fulltime-bg text-type-fulltime-text border border-transparent",
+    "bg-type-fulltime-bg text-type-fulltime-text border-[1.5px] border-type-fulltime-text/30",
   "part-time":
-    "bg-type-parttime-bg text-type-parttime-text border border-transparent",
-  remote: "bg-primary text-primary-foreground border border-transparent",
+    "bg-type-parttime-bg text-type-parttime-text border-[1.5px] border-type-parttime-text/30",
+  remote: "bg-foreground text-background border-[1.5px] border-foreground",
 };
+
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 export function JobCard({
   job,
@@ -26,30 +29,60 @@ export function JobCard({
     location: string;
     type: "full-time" | "part-time" | "remote";
     salaryRange?: string | null;
+    createdAt?: Date | string;
+    applicationCount?: number;
   };
 }) {
+  const createdAtMs =
+    job.createdAt instanceof Date
+      ? job.createdAt.getTime()
+      : typeof job.createdAt === "string"
+        ? new Date(job.createdAt).getTime()
+        : null;
+  const isNew = createdAtMs ? Date.now() - createdAtMs < 3 * DAY_MS : false;
+  const isHot = (job.applicationCount ?? 0) >= 3;
+
   return (
-    <article className="group jb-card-hover flex flex-col rounded-lg border border-border bg-card p-6">
+    <article className="group relative flex flex-col rounded-2xl border-2 border-foreground bg-card p-6 shadow-[3px_3px_0_var(--foreground)] transition-transform hover:-translate-x-px hover:-translate-y-px hover:shadow-[5px_5px_0_var(--foreground)]">
+      {isNew || isHot ? (
+        <div className="pointer-events-none absolute -right-2 -top-2 flex flex-col gap-1.5">
+          {isNew ? (
+            <span className="jb-sticker jb-sticker-new pointer-events-auto">
+              <Sparkles className="size-3" strokeWidth={2.5} />
+              New
+            </span>
+          ) : null}
+          {isHot ? (
+            <span className="jb-sticker jb-sticker-hot pointer-events-auto">
+              <Flame className="size-3" strokeWidth={2.5} />
+              Hot
+            </span>
+          ) : null}
+        </div>
+      ) : null}
       <div className="flex items-center justify-between gap-3">
         {job.companySlug ? (
           <Link
             href={`/companies/${job.companySlug}`}
-            className="text-small text-muted-foreground hover:text-foreground"
+            className="text-small font-medium text-muted-foreground hover:text-foreground"
           >
             {job.company}
           </Link>
         ) : (
-          <span className="text-small text-muted-foreground">
+          <span className="text-small font-medium text-muted-foreground">
             {job.company}
           </span>
         )}
         <span
-          className={`inline-flex items-center rounded-full px-2.5 py-1 text-caption ${TYPE_PILL[job.type]}`}
+          className={cn(
+            "inline-flex items-center rounded-full px-2.5 py-1 text-caption",
+            TYPE_PILL[job.type],
+          )}
         >
           {TYPE_LABEL[job.type]}
         </span>
       </div>
-      <h3 className="mt-3 text-h4 font-semibold leading-tight">
+      <h3 className="mt-3 text-h4 font-bold leading-tight">
         <Link
           href={`/jobs/${job.id}`}
           className="hover:underline focus-visible:outline-none"
@@ -76,12 +109,12 @@ export function JobCard({
       <div className="mt-4 flex justify-end">
         <Link
           href={`/jobs/${job.id}`}
-          className="inline-flex items-center gap-1 text-small text-muted-foreground transition-colors hover:text-foreground"
+          className="inline-flex items-center gap-1 text-small font-semibold text-foreground"
         >
           View role
           <ArrowRight
             className="size-4 jb-arrow-nudge"
-            strokeWidth={1.75}
+            strokeWidth={2}
             aria-hidden="true"
           />
         </Link>
