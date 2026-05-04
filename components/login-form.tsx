@@ -44,8 +44,11 @@ export function LoginForm() {
     if (res.ok) {
       const data = await res.json();
       toast.success("Welcome back");
-      const target =
-        data?.user?.role === "admin" && next === "/dashboard" ? "/admin" : next;
+      let target = next;
+      if (next === "/dashboard") {
+        if (data?.user?.role === "admin") target = "/admin";
+        else if (data?.user?.role === "employer") target = "/employer";
+      }
       router.push(target);
       router.refresh();
       return;
