@@ -85,6 +85,21 @@ export const adminAppsQuery = z.object({
   pageSize: z.coerce.number().int().min(1).max(50).default(10),
 });
 
+const apiRole = z.enum(["applicant", "employer", "admin"]);
+
+export const adminUsersQuery = z.object({
+  q: z.string().trim().max(100).optional(),
+  role: apiRole.optional(),
+  page: z.coerce.number().int().min(1).default(1),
+  pageSize: z.coerce.number().int().min(1).max(100).default(50),
+});
+
+export const userRoleUpdateSchema = z.object({
+  role: apiRole,
+});
+
+export type ApiRole = z.infer<typeof apiRole>;
+
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type JobCreateInput = z.infer<typeof jobCreateSchema>;
