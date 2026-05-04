@@ -27,7 +27,7 @@ const EMPLOYER_LINKS: NavLink[] = [
 ];
 
 const ADMIN_LINKS: NavLink[] = [
-  { href: "/admin", label: "Admin" },
+  { href: "/employer", label: "Dashboard" },
   { href: "/jobs", label: "Browse jobs" },
   { href: "/companies", label: "Companies" },
 ];

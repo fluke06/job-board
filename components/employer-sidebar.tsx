@@ -9,6 +9,7 @@ import {
   LogOut,
   Plus,
   Settings,
+  ShieldCheck,
   Users,
 } from "lucide-react";
 import { useState, useTransition } from "react";
@@ -23,24 +24,37 @@ type NavItem = {
   exact?: boolean;
 };
 
-const ITEMS: NavItem[] = [
+const EMPLOYER_ITEMS: NavItem[] = [
   { href: "/employer", label: "Overview", Icon: LayoutGrid, exact: true },
   { href: "/employer/jobs", label: "Job Listings", Icon: Briefcase },
   { href: "/employer/candidates", label: "Talent Pool", Icon: Users },
   { href: "/employer/company", label: "Settings", Icon: Settings },
 ];
 
+const ADMIN_ITEMS: NavItem[] = [
+  { href: "/employer", label: "Overview", Icon: LayoutGrid, exact: true },
+  { href: "/employer/jobs", label: "Job Listings", Icon: Briefcase },
+  { href: "/employer/candidates", label: "Talent Pool", Icon: Users },
+  { href: "/admin/companies", label: "Companies", Icon: Building2 },
+  { href: "/admin/users", label: "Users", Icon: ShieldCheck },
+];
+
 export function EmployerSidebar({
   companyName,
   userName,
+  role = "employer",
 }: {
   companyName: string;
   userName: string;
+  role?: "employer" | "admin";
 }) {
   const pathname = usePathname() ?? "";
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [open, setOpen] = useState(false);
+
+  const items = role === "admin" ? ADMIN_ITEMS : EMPLOYER_ITEMS;
+  const subtitle = role === "admin" ? "Platform admin" : companyName;
 
   function isActive(item: NavItem) {
     return item.exact
@@ -83,7 +97,7 @@ export function EmployerSidebar({
           "fixed inset-y-0 left-0 z-30 flex w-60 flex-col border-r border-border bg-muted/30 transition-transform md:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full md:translate-x-0",
         )}
-        aria-label="Employer navigation"
+        aria-label="Workspace navigation"
       >
         <div className="flex items-center gap-3 border-b border-border px-4 py-4">
           <Link href="/employer" className="flex items-center gap-2">
@@ -95,7 +109,7 @@ export function EmployerSidebar({
             <div className="leading-tight">
               <div className="text-small font-bold">JobBoard</div>
               <div className="text-caption text-muted-foreground">
-                {companyName}
+                {subtitle}
               </div>
             </div>
           </Link>
@@ -103,7 +117,7 @@ export function EmployerSidebar({
 
         <nav className="flex-1 overflow-y-auto p-3">
           <ul className="flex flex-col gap-1">
-            {ITEMS.map((item) => {
+            {items.map((item) => {
               const active = isActive(item);
               return (
                 <li key={item.href}>
@@ -144,7 +158,7 @@ export function EmployerSidebar({
             <div className="min-w-0 flex-1">
               <p className="truncate text-small font-medium">{userName}</p>
               <p className="text-caption text-muted-foreground">
-                {companyName}
+                {role === "admin" ? "Admin" : companyName}
               </p>
             </div>
             <button

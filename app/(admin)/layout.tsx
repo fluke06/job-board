@@ -3,8 +3,7 @@ import { Role } from "@prisma/client";
 import { getSession } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { logEvent } from "@/lib/logger";
-import { SiteShell } from "@/components/site-shell";
-import { AdminSubnav } from "@/components/admin-subnav";
+import { EmployerSidebar } from "@/components/employer-sidebar";
 
 export default async function AdminLayout({
   children,
@@ -16,7 +15,7 @@ export default async function AdminLayout({
 
   const user = await prisma.user.findUnique({
     where: { id: session.userId },
-    select: { role: true },
+    select: { name: true, role: true },
   });
   if (!user || user.role !== Role.ADMIN) {
     logEvent("rbac.denied", { scope: "admin-layout", userId: session.userId });
@@ -24,9 +23,17 @@ export default async function AdminLayout({
   }
 
   return (
-    <SiteShell>
-      <AdminSubnav />
-      {children}
-    </SiteShell>
+    <div className="flex min-h-screen w-full flex-col md:flex-row">
+      <EmployerSidebar
+        companyName="Platform admin"
+        userName={user.name}
+        role="admin"
+      />
+      <div className="flex-1 md:ml-60">
+        <main id="main" className="w-full">
+          {children}
+        </main>
+      </div>
+    </div>
   );
 }

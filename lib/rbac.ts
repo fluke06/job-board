@@ -30,6 +30,7 @@ export async function requireAdmin(): Promise<Session> {
 export type EmployerContext = {
   session: Session;
   companyIds: string[];
+  ownCompanyIds: string[];
 };
 
 export async function requireEmployer(): Promise<EmployerContext> {
@@ -45,9 +46,22 @@ export async function requireEmployer(): Promise<EmployerContext> {
   if (user.role !== Role.EMPLOYER && user.role !== Role.ADMIN) {
     throw new HttpError(403, "Forbidden");
   }
+
+  const ownCompanyIds = user.companies.map((c) => c.companyId);
+
+  if (user.role === Role.ADMIN) {
+    const all = await prisma.company.findMany({ select: { id: true } });
+    return {
+      session,
+      companyIds: all.map((c) => c.id),
+      ownCompanyIds,
+    };
+  }
+
   return {
     session,
-    companyIds: user.companies.map((c) => c.companyId),
+    companyIds: ownCompanyIds,
+    ownCompanyIds,
   };
 }
 

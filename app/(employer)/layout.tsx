@@ -54,11 +54,20 @@ export default async function EmployerLayout({
     );
   }
 
-  const companyName = user.companies[0]?.company.name ?? "Your company";
+  const companyName =
+    user.role === Role.ADMIN
+      ? "Platform admin"
+      : (user.companies[0]?.company.name ?? "Your company");
+  const sidebarRole: "admin" | "employer" =
+    user.role === Role.ADMIN ? "admin" : "employer";
 
   return (
     <div className="flex min-h-screen w-full flex-col md:flex-row">
-      <EmployerSidebar companyName={companyName} userName={user.name} />
+      <EmployerSidebar
+        companyName={companyName}
+        userName={user.name}
+        role={sidebarRole}
+      />
       <div className="flex-1 md:ml-60">
         <main id="main" className="w-full">
           {children}
